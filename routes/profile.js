@@ -5,7 +5,7 @@ const {
   createProfile,
   updateProfile,
   deleteProfile
-} = require('../controllers/Profiles');
+} = require('../controllers/profile');
 
 const Profile = require('../models/Profile');
 
