@@ -5,16 +5,16 @@ const {
   createProfile,
   updateProfile,
   deleteProfile
-} = require('../controllers/profile');
+} = require('../controllers/profiles');
 
 const Profile = require('../models/Profile');
 
 const router = express.Router({ mergeParams: true });
 
 const advancedResults = require('../middleware/advancedResults');
-// const { protect, authorize } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 
-// router.use(protect);
+router.use(protect);
 // router.use(authorize('admin'));
 
 router

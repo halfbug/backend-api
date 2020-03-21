@@ -1,6 +1,6 @@
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
-const App = require('../models/Profile');
+const Profile = require('../models/Profile');
 
 // @desc      Get all Profiles
 // @route     GET /api/v1/Profiles
@@ -13,11 +13,11 @@ exports.getProfiles = asyncHandler(async (req, res, next) => {
 // @route     GET /api/v1/Profiles/:id
 // @access    Private/Admin
 exports.getProfile = asyncHandler(async (req, res, next) => {
-  const Profile = await Profile.findById(req.params.id);
+  const profile = await Profile.findById(req.params.id);
 
   res.status(200).json({
     success: true,
-    data: Profile
+    data: profile
   });
 });
 
@@ -25,11 +25,13 @@ exports.getProfile = asyncHandler(async (req, res, next) => {
 // @route     POST /api/v1/Profiles
 // @access    Private/Admin
 exports.createProfile = asyncHandler(async (req, res, next) => {
-  const Profile = await Profile.create(req.body);
-
+  console.log(req.user)
+  req.body.userId = req.user.id;
+  const profile = await Profile.create(req.body);
+// console.log (Profile)
   res.status(201).json({
     success: true,
-    data: Profile
+    data: profile
   });
 });
 
@@ -37,14 +39,14 @@ exports.createProfile = asyncHandler(async (req, res, next) => {
 // @route     PUT /api/v1/Profiles/:id
 // @access    Private/Admin
 exports.updateProfile = asyncHandler(async (req, res, next) => {
-  const Profile = await Profile.findByIdAndUpdate(req.params.id, req.body, {
+  const profile = await Profile.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true
   });
 
   res.status(200).json({
     success: true,
-    data: Profile
+    data: profile
   });
 });
 
