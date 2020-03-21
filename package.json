@@ -1,7 +1,7 @@
 {
-  "name": "devcamper_api",
+  "name": "backend_api",
   "version": "1.0.0",
-  "description": "Devcamper backend API",
+  "description": "Hopeaccelerated backend API",
   "main": "server.js",
   "scripts": {
     "start": "NODE_ENV=production node server",
