@@ -1,13 +1,13 @@
 const express = require('express');
 const {
-  getUsers,
-  getUser,
-  createUser,
-  updateUser,
-  deleteUser
-} = require('../controllers/users');
+  getProfiles,
+  getProfile,
+  createProfile,
+  updateProfile,
+  deleteProfile
+} = require('../controllers/Profiles');
 
-const User = require('../models/User');
+const Profile = require('../models/Profile');
 
 const router = express.Router({ mergeParams: true });
 
@@ -19,13 +19,13 @@ router.use(authorize('admin'));
 
 router
   .route('/')
-  .get(advancedResults(User), getUsers)
-  .post(createUser);
+  .get(advancedResults(Profile), getProfiles)
+  .post(createProfile);
 
 router
   .route('/:id')
-  .get(getUser)
-  .put(updateUser)
-  .delete(deleteUser);
+  .get(getProfile)
+  .put(updateProfile)
+  .delete(deleteProfile);
 
 module.exports = router;
