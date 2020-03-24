@@ -3,7 +3,7 @@ const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const sendEmail = require('../utils/sendEmail');
 const User = require('../models/User');
-
+const Profile = require('../models/Profile');
 // @desc      Register user
 // @route     POST /api/v1/auth/register
 // @access    Public
@@ -17,6 +17,23 @@ exports.register = asyncHandler(async (req, res, next) => {
     password,
     
   });
+
+
+  const message = `OTP has been successfully generated. Your pin is : ${user.otp}`;
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: 'OTP - Hopeaccelerated',
+      message
+    });
+
+    res.status(200).json({ success: true, data: 'Email sent' });
+  } catch (err) {
+    console.log(err);
+
+    return next(new ErrorResponse('Email could not be sent', 500));
+  }
 
   sendTokenResponse(user, 200, res);
 });
@@ -69,10 +86,10 @@ exports.logout = asyncHandler(async (req, res, next) => {
 // @access    Private
 exports.getMe = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user.id);
-
+  const profile = await Profile.findOne({userId: user.id})
   res.status(200).json({
     success: true,
-    data: user
+    data: {user, profile}
   });
 });
 
