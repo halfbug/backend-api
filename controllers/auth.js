@@ -2,40 +2,55 @@ const crypto = require('crypto');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const sendEmail = require('../utils/sendEmail');
+const sendSMS =  require('../utils/sendSMS');
 const User = require('../models/User');
 const Profile = require('../models/Profile');
 // @desc      Register user
 // @route     POST /api/v1/auth/register
 // @access    Public
 exports.register = asyncHandler(async (req, res, next) => {
-  const {  email, password, phone } = req.body;
+  const { name, email, password, phone } = req.body;
 
   // Create user
   const user = await User.create({
     phone,
     email,
     password,
-    
+    name
   });
 
 
-  const message = `OTP has been successfully generated. Your pin is : ${user.otp}`;
+  const message = `OTP - Hopeaccelerated has been successfully generated. Your pin is : ${user.otp}`;
 
   try {
+
+    await sendSMS({
+      phone,
+      message
+    });
+
     await sendEmail({
       email: user.email,
       subject: 'OTP - Hopeaccelerated',
       message
     });
 
-    res.status(200).json({ success: true, data: 'Email sent' });
+    
+
+  const {status, email, createdAt, phone} = user
+
+  res.status(200).json({ success: true, 
+      message: 'OTP has been sent to mobile and email',
+    data:{status, email, createdAt, phone} });
+    
+
   } catch (err) {
-    console.log(err);
+    console.log(err); 
 
     return next(new ErrorResponse('Email could not be sent', 500));
   }
 
-  sendTokenResponse(user, 200, res);
+  
 });
 
 // @desc      Login user

@@ -1,58 +1,59 @@
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
-const Role = require('../models/Role');
+const Apps = require('../models/App');
 
-// @desc      Get all Roles
-// @route     GET /api/v1/Roles
+// @desc      Get all Appss
+// @route     GET /api/v1/Appss
 // @access    Private/Admin
-exports.getRoles = asyncHandler(async (req, res, next) => {
-  res.status(200).json(res.advancedResults);
+exports.getApps = asyncHandler(async (req, res, next) => {
+//  res.status(200).json({Mes:"done"});
+   res.status(200).json(res.advancedResults);
 });
 
-// @desc      Get single Role
-// @route     GET /api/v1/Roles/:id
+// @desc      Get single Apps
+// @route     GET /api/v1/Appss/:id
 // @access    Private/Admin
-exports.getRole = asyncHandler(async (req, res, next) => {
-  const Role = await Role.findById(req.params.id);
+exports.getApp = asyncHandler(async (req, res, next) => {
+  const App = await Apps.findById(req.params.id);
 
   res.status(200).json({
     success: true,
-    data: Role
+    data: App
   });
 });
 
-// @desc      Create Role
-// @route     POST /api/v1/Roles
+// @desc      Create Apps
+// @route     POST /api/v1/Appss
 // @access    Private/Admin
-exports.createRole = asyncHandler(async (req, res, next) => {
-  const Role = await Role.create(req.body);
+exports.createApp = asyncHandler(async (req, res, next) => {
+  const App = await Apps.create(req.body);
 
   res.status(201).json({
     success: true,
-    data: Role
+    data: App
   });
 });
 
-// @desc      Update Role
-// @route     PUT /api/v1/Roles/:id
+// @desc      Update Apps
+// @route     PUT /api/v1/Appss/:id
 // @access    Private/Admin
-exports.updateRole = asyncHandler(async (req, res, next) => {
-  const Role = await Role.findByIdAndUpdate(req.params.id, req.body, {
+exports.updateApp = asyncHandler(async (req, res, next) => {
+  const App = await Apps.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true
   });
 
   res.status(200).json({
     success: true,
-    data: Role
+    data: App
   });
 });
 
-// @desc      Delete Role
-// @route     DELETE /api/v1/Roles/:id
+// @desc      Delete Apps
+// @route     DELETE /api/v1/Appss/:id
 // @access    Private/Admin
-exports.deleteRole = asyncHandler(async (req, res, next) => {
-  await Role.findByIdAndDelete(req.params.id);
+exports.deleteApp = asyncHandler(async (req, res, next) => {
+  await Apps.findByIdAndDelete(req.params.id);
 
   res.status(200).json({
     success: true,
