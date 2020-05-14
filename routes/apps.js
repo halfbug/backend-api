@@ -4,7 +4,8 @@ const {
   getApp,
   createApp,
   updateApp,
-  deleteApp
+  deleteApp,
+  getAppKey
 } = require('../controllers/apps');
 
 const App = require('../models/App');
@@ -22,10 +23,14 @@ router
   .get(advancedResults(App), getApps)
   .post(createApp);
 
+  router.route('/:name/:medium?').get(getAppKey);
+
 router
   .route('/:id')
   .get(getApp)
   .put(updateApp)
   .delete(deleteApp);
+
+
 
 module.exports = router;

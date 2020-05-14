@@ -1,13 +1,13 @@
 const express = require('express');
 const {
-  getProfiles,
-  getProfile,
-  createProfile,
-  updateProfile,
-  deleteProfile
-} = require('../controllers/profiles');
+  getRoles,
+  getRole,
+  createRole,
+  updateRole,
+  deleteRole
+} = require('../controllers/Roles');
 
-const Profile = require('../models/Profile');
+const Role = require('../models/Role');
 
 const router = express.Router({ mergeParams: true });
 
@@ -19,13 +19,13 @@ router.use(protect);
 
 router
   .route('/')
-  .get(advancedResults(Profile), getProfiles)
-  .post(createProfile);
+  .get(advancedResults(Role), getRoles)
+  .post(createRole);
 
 router
   .route('/:id')
-  .get(getProfile) 
-  .put(updateProfile)
-  .delete(deleteProfile);
+  .get(getRole) 
+  .put(updateRole)
+  .delete(deleteRole);
 
 module.exports = router;

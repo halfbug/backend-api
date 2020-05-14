@@ -4,7 +4,7 @@ const RoleSchema = new mongoose.Schema({
   name: {
     type: String,
     trim: true,
-    required: [true, 'Please add a title for the review'],
+    required: [true, 'Please add a title for the role'],
     maxlength: 100
   },
   appId: {

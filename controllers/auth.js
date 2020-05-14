@@ -9,25 +9,38 @@ const Profile = require('../models/Profile');
 // @route     POST /api/v1/auth/register
 // @access    Public
 exports.register = asyncHandler(async (req, res, next) => {
-  const { name, email, password, phone } = req.body;
+  const { email, password, phone, roleId, appsChannelKey, socialAcc  } = req.body;
 
+  // Validate emil & password
+  if (!roleId || !appsChannelKey ) {
+    return next(new ErrorResponse('Role Id and appsChannelKey is mandatory  ', 400));
+  }
   // Create user
-  const user = await User.create({
-    phone,
-    email,
-    password,
-    name
-  });
+  const user = await User.create(
+   req.body
+    
+  );
 
+  user.roles.push(roleId);
+  user.appsInUse.push(appsChannelKey);
+  // socialAcc.map((acc)=>{
+  //   user.socialAcc.push()
+  // })
+  // Create user profile
+  const uprofile = await Profile.create({
+    ...req.body.profile, userId : user._id
+  }
+    
+   );
 
   const message = `OTP - Hopeaccelerated has been successfully generated. Your pin is : ${user.otp}`;
 
   try {
 
-    await sendSMS({
-      phone,
-      message
-    });
+    // await sendSMS({
+    //   phone,
+    //   message
+    // });
 
     await sendEmail({
       email: user.email,
@@ -37,15 +50,15 @@ exports.register = asyncHandler(async (req, res, next) => {
 
     
 
-  const {status, email, createdAt, phone} = user
+  // const {status, email, createdAt, phone} = user
 
   res.status(200).json({ success: true, 
       message: 'OTP has been sent to mobile and email',
-    data:{status, email, createdAt, phone} });
+    data:{...user._doc, profile : uprofile} });
     
 
   } catch (err) {
-    console.log(err); 
+    console.log(JSON.stringify(err)); 
 
     return next(new ErrorResponse('Email could not be sent', 500));
   }
@@ -53,6 +66,43 @@ exports.register = asyncHandler(async (req, res, next) => {
   
 });
 
+
+
+// @desc      vserify OTP
+// @route     POST /api/v1/auth/votp
+// @access    Public
+exports.votp = asyncHandler(async (req, res, next) => {
+  const { email, phone, otp } = req.body;
+
+  // Validate emil & password
+  if (!email || !otp || !phone) {
+    return next(new ErrorResponse('Please provide an email phone and otp', 400));
+  }
+
+  // Check for user
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return next(new ErrorResponse('Email not found', 401));
+  }
+  if (parseInt(user.otp) === 0 && user.status !== "pending") {
+    return next(new ErrorResponse('User already verified', 401));
+  }
+  // Check if password matches
+  const isMatch = parseInt(user.otp) === parseInt(otp);
+console.log(isMatch)
+  if (!isMatch) {
+    return next(new ErrorResponse('OTP didnt match', 401));
+  }
+
+
+  await User.findByIdAndUpdate(user.id, { status : "active", otp : 0}, {
+    new: true,
+    runValidators: true
+  });
+
+  sendTokenResponse(user, 200, res);
+});
 // @desc      Login user
 // @route     POST /api/v1/auth/login
 // @access    Public

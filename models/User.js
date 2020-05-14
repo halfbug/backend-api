@@ -41,15 +41,9 @@ const UserSchema = new mongoose.Schema({
   TowFactorAuthExpire : Date,
   roles: {
     type: [],
-    ref: '[Role]',
-    //required: [true, 'Please define role'],
-    // default : "03jlksdoifwlkejrlwkejr"
-  },
+    },
   appsInUse: {
     type: [],
-    ref: '[Apps]',
-    //required: [true, 'Please define role'],
-    // default : "03jlksdoifwlkejrlwkejr"
   },
   deviceId: String,
   otp:{
@@ -64,6 +58,16 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  preferredLanguage: String,
+  lastUpdate: {
+    type: Date,
+    default: Date.now
+  },
+  isOnline : {
+    type: Boolean,
+    default: 0
+  },
+  socialAcc : [ {type : mongoose.Schema.Types.ObjectId, ref : 'SocialAccounts'}],
   lastUpdate: {
     type: Date,
     default: Date.now

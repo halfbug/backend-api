@@ -13,11 +13,11 @@ exports.getRoles = asyncHandler(async (req, res, next) => {
 // @route     GET /api/v1/Roles/:id
 // @access    Private/Admin
 exports.getRole = asyncHandler(async (req, res, next) => {
-  const Role = await Role.findById(req.params.id);
+  const role = await Role.findById(req.params.id);
 
   res.status(200).json({
     success: true,
-    data: Role
+    data: role
   });
 });
 
@@ -25,11 +25,12 @@ exports.getRole = asyncHandler(async (req, res, next) => {
 // @route     POST /api/v1/Roles
 // @access    Private/Admin
 exports.createRole = asyncHandler(async (req, res, next) => {
-  const Role = await Role.create(req.body);
+  console.log(req.body.name)
+  const role = await Role.create(req.body);
 
   res.status(201).json({
     success: true,
-    data: Role
+    data: role
   });
 });
 
@@ -37,14 +38,14 @@ exports.createRole = asyncHandler(async (req, res, next) => {
 // @route     PUT /api/v1/Roles/:id
 // @access    Private/Admin
 exports.updateRole = asyncHandler(async (req, res, next) => {
-  const Role = await Role.findByIdAndUpdate(req.params.id, req.body, {
+  const role = await Role.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true
   });
 
   res.status(200).json({
     success: true,
-    data: Role
+    data: role
   });
 });
 

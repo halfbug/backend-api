@@ -37,8 +37,19 @@ const ProfileSchema = new mongoose.Schema(
     
     address: {
       type: String,
-      required: [true, 'Please add an address']
+      // required: [true, 'Please add an address']
     },
+    
+    country: {
+      type: String,
+      // required: [true, 'Please add an address']
+    },
+
+    city: {
+      type: String,
+      // required: [true, 'Please add an address']
+    },
+
     location: {
       // GeoJSON Point
       type: {
@@ -49,16 +60,17 @@ const ProfileSchema = new mongoose.Schema(
         type: [Number],
         index: '2dsphere'
       },
-      formattedAddress: String,
-      street: String,
-      city: String,
-      state: String,
-      zipcode: String,
-      country: String
+      
+      // Address: String,
+      // street: String,
+      // city: String,
+      // state: String,
+      // zipcode: String,
+      // country: String
     },
     careers: {
       // Array of strings
-      type: [String],
+      type: String,
       
     },
     
@@ -70,7 +82,12 @@ const ProfileSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
-    
+
+    maritalStatus: {
+      type: String,
+     
+      enum : ['Single','Married','Divorced','Widowed']
+    },
     createdAt: {
       type: Date,
       default: Date.now
@@ -78,16 +95,19 @@ const ProfileSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.ObjectId,
       ref: 'User',
-      required: true
+      required: true,
+      unique:[ true, 'User already present'],
+      dropDups: true
     }
   },
+
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
   }
 );
 
-// Create bootcamp slug from the name
+// Create profile slug from the name
 // ProfileSchema.pre('save', function(next) {
 //   this.slug = slugify(this.name, { lower: true });
 //   next();
@@ -113,15 +133,15 @@ const ProfileSchema = new mongoose.Schema(
 //   next();
 // });
 
-// Cascade delete courses when a bootcamp is deleted
+// Cascade delete appointments when a bootcamp is deleted
 // ProfileSchema.pre('remove', async function(next) {
-//   // console.log(`Courses being removed from bootcamp ${this._id}`);
+//   // console.log(`appointments being removed from bootcamp ${this._id}`);
 //   // await this.model('Course').deleteMany({ bootcamp: this._id });
 //   next();
 // });
 
 // Reverse populate with virtuals
-// ProfileSchema.virtual('courses', {
+// ProfileSchema.virtual('appointments', {
 //   ref: 'Course',
 //   localField: '_id',
 //   foreignField: 'bootcamp',
