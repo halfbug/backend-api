@@ -5,7 +5,7 @@ const {
   createRole,
   updateRole,
   deleteRole
-} = require('../controllers/Roles');
+} = require('../controllers/apps');
 
 const Role = require('../models/Role');
 
