@@ -8,7 +8,8 @@ const {
   resetPassword,
   updateDetails,
   updatePassword,
-  votp
+  votp,
+  regenotp
 } = require('../controllers/auth');
 
 const router = express.Router();
@@ -18,6 +19,7 @@ const { protect } = require('../middleware/auth');
 router.post('/register', register);
 router.post('/login', login);
 router.post('/votp', votp);
+router.put('/regenotp', regenotp);
 router.get('/logout', logout);
 router.get('/me', protect, getMe);
 router.put('/updatedetails', protect, updateDetails);

@@ -20,9 +20,10 @@ exports.register = asyncHandler(async (req, res, next) => {
    req.body
     
   );
-
+console.log(roleId)
   user.roles.push(roleId);
   user.appsInUse.push(appsChannelKey);
+  await user.save();
   // socialAcc.map((acc)=>{
   //   user.socialAcc.push()
   // })
@@ -103,6 +104,68 @@ console.log(isMatch)
 
   sendTokenResponse(user, 200, res);
 });
+
+
+// @desc      regenerate OTP
+// @route     POST /api/v1/auth/regenotp
+// @access    Public
+exports.regenotp = asyncHandler(async (req, res, next) => {
+  const { email, phone } = req.body;
+
+  // Validate emil & password
+  if (!email || !phone) {
+    return next(new ErrorResponse('Please provide an email and phone number', 400));
+  }
+
+  // Check for user
+  const user = await User.findOne({ email, phone });
+
+  if (!user) {
+    return next(new ErrorResponse('Email or phone not found', 401));
+  }
+
+  
+
+  if (parseInt(user.otp) === 0 && user.status !== "pending") {
+    return next(new ErrorResponse('User already verified', 401));
+  }
+  
+  // Re Generate the OPT
+  console.log(user)
+  const notp =await user.getRegeneratedOTP();
+
+  const message = `OTP - Hopeaccelerated has been successfully generated. Your pin is : ${notp}`;
+
+  try {
+
+    // await sendSMS({
+    //   phone,
+    //   message
+    // });
+
+    await sendEmail({
+      email: user.email,
+      subject: 'OTP - Hopeaccelerated',
+      message
+    });
+
+    
+
+  // const {status, email, createdAt, phone} = user
+
+  res.status(200).json({ success: true, 
+      message: 'OTP has been sent to mobile and email',
+    data:user });
+    
+
+  } catch (err) {
+    console.log(JSON.stringify(err)); 
+
+    return next(new ErrorResponse(err.message, 500));
+  }
+});
+
+
 // @desc      Login user
 // @route     POST /api/v1/auth/login
 // @access    Public

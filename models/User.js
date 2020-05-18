@@ -39,12 +39,11 @@ const UserSchema = new mongoose.Schema({
   resetPasswordToken: String,
   resetPasswordExpire: Date,
   TowFactorAuthExpire : Date,
-  roles: {
-    type: [],
-    },
-  appsInUse: {
-    type: [],
-  },
+  roles: 
+    [ {type : mongoose.Schema.Types.ObjectId, ref : 'Roles'}],
+  
+  appsInUse: [ {type : String }],
+  
   deviceId: String,
   otp:{
     type : Number,
@@ -115,6 +114,17 @@ UserSchema.methods.getResetPasswordToken = function() {
   this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
 
   return resetToken;
+};
+
+// Regenerate OTP
+UserSchema.methods.getRegeneratedOTP = function() {
+  // Generate otp
+  const newOTP = OTPGenerator();
+
+  this.otp = newOTP;
+
+  
+  return newOTP;
 };
 
 module.exports = mongoose.model('User', UserSchema);
