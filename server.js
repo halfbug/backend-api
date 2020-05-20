@@ -27,6 +27,8 @@ const profile = require('./routes/profile');
 const apps = require('./routes/apps');
 const roles = require('./routes/roles');
 const socialAccounts = require('./routes/socialAccounts')
+const rolesprofile = require('./routes/rolesProfile');
+
 
 const app = express();
 
@@ -76,6 +78,7 @@ app.use('/api/v1/profile', profile);
 app.use('/api/v1/apps', apps);
 app.use('/api/v1/roles', roles);
 app.use('/api/v1/socialacc', socialAccounts);
+app.use('/api/v1/rp', rolesprofile);
 
 
 app.use(errorHandler);
