@@ -1,7 +1,8 @@
 const express = require('express');
 const {
     addDoctor,
-    getDoctors
+    getDoctors,
+    addPatient,
 //   getRole,
 //   createRole,
 //   updateRole,
@@ -23,7 +24,11 @@ router
   .post(addDoctor)
    .get(advancedResults(Role), getDoctors)
   
-
+router
+   .route('/patient')
+   .post(addPatient)
+    .get(advancedResults(Role), getDoctors)
+ 
 // router
 //   .route('/:id')
 //   .get(getRole) 

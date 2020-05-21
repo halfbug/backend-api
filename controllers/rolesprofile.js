@@ -18,11 +18,11 @@ exports.addDoctor = asyncHandler(async (req, res, next) => {
     }
      req.body.userId=req.user.id;
 
-     const rp= await RolesProfile.findOne({userId : req.user.id})
-     console.log(rp)
-     if (rp ) {
-      return next(new ErrorResponse(`User's doctor profile already present`, 400));
-    }
+    //  const rp= await RolesProfile.findOne({userId : req.user.id})
+    //  console.log(rp)
+    //  if (rp ) {
+    //   return next(new ErrorResponse(`User's doctor profile already present`, 400));
+    // }
 
     //get role id
     const name = req.url.replace(/\//g, "")
@@ -33,6 +33,13 @@ exports.addDoctor = asyncHandler(async (req, res, next) => {
     }
     req.body.roleId=role._id
     // req.body.documents=[]
+ 
+    const rp= await RolesProfile.findOne({userId : req.user.id, roleId : role._id })
+    console.log(rp)
+    if (rp ) {
+     return next(new ErrorResponse(`User's ${name} profile already present`, 400));
+   }
+ 
     //save to database
    let rolepro = await RolesProfile.create(req.body);
  
@@ -104,4 +111,44 @@ exports.getDoctors = asyncHandler(async (req, res, next) => {
       success: true,
       data: profiles
     });
+});
+
+
+// @desc      Create Patient
+// @route     POST /api/v1/rp/patient
+// @access    Private/Admin
+exports.addPatient = asyncHandler(async (req, res, next) => {
+  console.log(req.url)
+  const name = req.url.replace(/\//g, "")
+
+  //get userid
+  if (!req.user) {
+   return next(new ErrorResponse(`User Not Found`, 404));
+ }
+  req.body.userId=req.user.id;
+
+  
+ //get role id
+ console.log(name)
+ const role = await Role.findOne({name});
+ if (!role) {
+   return next(new ErrorResponse(`Role Not Found`, 404));
+ }
+ req.body.roleId=role._id
+
+
+ const rp= await RolesProfile.findOne({userId : req.user.id, roleId : role._id })
+  console.log(rp)
+  if (rp ) {
+   return next(new ErrorResponse(`User's ${name} profile already present`, 400));
+ }
+
+ // req.body.documents=[]
+ //save to database
+let rolepro = await RolesProfile.create(req.body);
+
+res.status(201).json({
+  success: true,
+  data: rolepro
+});
 });
