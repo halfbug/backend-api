@@ -5,6 +5,7 @@ const sendEmail = require('../utils/sendEmail');
 const sendSMS =  require('../utils/sendSMS');
 const User = require('../models/User');
 const Profile = require('../models/Profile');
+const {hashIt} = require('../utils/helper')
 // @desc      Register user
 // @route     POST /api/v1/auth/register
 // @access    Public
@@ -97,7 +98,7 @@ console.log(isMatch)
   }
 
 
-  await User.findByIdAndUpdate(user.id, { status : "active", otp : 0}, {
+  await User.findByIdAndUpdate(user.id, { status : "active", otp : 0, qrcode : hashIt(email+phone)}, {
     new: true,
     runValidators: true
   });
