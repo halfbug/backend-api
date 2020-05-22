@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const OTPGenerator = require('../utils/otpgenerator')
 const Role = require('./Role')
+const {hashIt} = require('../utils/helper')
 
 const UserSchema = new mongoose.Schema({
   
@@ -56,6 +57,7 @@ const UserSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+    
   },
   preferredLanguage: String,
   lastUpdate: {
@@ -84,6 +86,7 @@ UserSchema.pre('save', async function(next) {
   //generate otp
   console.log(OTPGenerator())
   this.otp = await OTPGenerator();
+  this.qrcode = hashIt(this.phone+this.email)
 
 });
 

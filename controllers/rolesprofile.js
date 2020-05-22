@@ -97,6 +97,7 @@ await rolepro.save()
 // @access    Private/Admin
 exports.getDoctors = asyncHandler(async (req, res, next) => {
   console.log(req.url)
+  console.log("inside url ")
     //get role id
     const name = req.url.replace(/\//g, "")
     console.log(name)
@@ -151,4 +152,59 @@ res.status(201).json({
   success: true,
   data: rolepro
 });
+});
+
+// @desc      Get All roleprofiles by role
+// @route     GET /api/v1/rp/:role
+// @access    Private/Admin
+exports.getRps = asyncHandler(async (req, res, next) => {
+   console.log("inside rps")
+    //get role id
+    const name = req.params.role
+    console.log(name)
+    const role = await Role.findOne({name});
+    if (!role) {
+      return next(new ErrorResponse(`${name} Not Found`, 404));
+    }
+    
+    const profiles = await RolesProfile.find({roleId : role._id})
+    .populate({
+      path: 'userId',
+    select: 'email isOnline phone',
+    model: 'User'
+    }).populate (
+      {
+        path : 'userId._id',
+        select: 'firstName lastName',
+        model: 'Profile'
+      }
+    )
+    .exec();
+    
+    console.log(profiles)
+    
+    res.status(201).json({
+      success: true,
+      data: profiles
+    });
+});
+
+// @desc      Get All roleprofile by role and id
+// @route     GET /api/v1/rp/:role/:id
+// @access    Private/Admin
+exports.getRpById = asyncHandler(async (req, res, next) => {
+   
+  //get role id
+  const name = req.params.role
+  console.log(name)
+  const role = await Role.findOne({name});
+  if (!role) {
+    return next(new ErrorResponse(`${name} Not Found`, 404));
+  }
+  const userId = req.params.id 
+  const profiles = await RolesProfile.find({roleId : role._id, userId })
+  res.status(201).json({
+    success: true,
+    data: profiles
+  });
 });

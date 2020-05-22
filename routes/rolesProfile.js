@@ -3,6 +3,8 @@ const {
     addDoctor,
     getDoctors,
     addPatient,
+    getRps,
+    getRpById
 //   getRole,
 //   createRole,
 //   updateRole,
@@ -19,19 +21,20 @@ const { protect, authorize } = require('../middleware/auth');
 router.use(protect);
 // router.use(authorize('admin'));
 
-router
-  .route('/doctor')
-  .post(addDoctor)
-   .get(advancedResults(Role), getDoctors)
-  
-router
-   .route('/patient')
-   .post(addPatient)
-    .get(advancedResults(Role), getDoctors)
- 
 // router
-//   .route('/:id')
-//   .get(getRole) 
+//   .route('/doctor')
+//   .post(addDoctor)
+//    .get(advancedResults(Role), getDoctors)
+  
+ 
+router
+  .route('/:role')
+  .get(advancedResults(Role), getRps)
+
+router
+  .route('/:role/:id')
+  .get(getRpById) 
+
 //   .put(updateRole)
 //   .delete(deleteRole);
 
