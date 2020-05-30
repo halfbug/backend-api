@@ -28,6 +28,7 @@ const apps = require('./routes/apps');
 const roles = require('./routes/roles');
 const socialAccounts = require('./routes/socialAccounts')
 const rolesprofile = require('./routes/rolesProfile');
+const dialogflow = require('./routes/dialogflow');
 
 
 const app = express();
@@ -79,6 +80,7 @@ app.use('/api/v1/apps', apps);
 app.use('/api/v1/roles', roles);
 app.use('/api/v1/socialacc', socialAccounts);
 app.use('/api/v1/rp', rolesprofile);
+app.use('/api/v1/df', dialogflow);
 
 
 app.use(errorHandler);
