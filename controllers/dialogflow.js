@@ -51,7 +51,7 @@ if (result.intent) {
 }
 
   
-res.status(200).json( {'do': 'text query', result});
+res.status(200).json(result);
 });
 
 

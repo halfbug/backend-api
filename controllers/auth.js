@@ -250,7 +250,7 @@ exports.updatePassword = asyncHandler(async (req, res, next) => {
 
   // Check current password
   if (!(await user.matchPassword(req.body.currentPassword))) {
-    return next(new ErrorResponse('Password is incorrect', 401));
+    return next(new ErrorResponse('Password r incorrect', 401));
   }
 
   user.password = req.body.newPassword;
@@ -328,6 +328,65 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
   sendTokenResponse(user, 200, res);
 });
 
+
+// @desc      Login user by phone
+// @route     POST /api/v1/auth/plogin
+// @access    Public
+exports.plogin = asyncHandler(async (req, res, next) => {
+  const { phone } = req.body;
+
+  // Validate emil & password
+  if (!phone) {
+    return next(new ErrorResponse('Please provide phone number', 400));
+  }
+
+  // Check for user
+  let user = await User.findOne({ phone }).select('+password');
+
+  if (!user) {
+    return next(new ErrorResponse('Invalid phone number', 401));
+  }
+
+ // Re Generate the OPT
+//  console.log(user)
+ const notp =await user.getRegeneratedOTP();
+  user=await user.save();
+  
+  console.log(notp)
+  const message = `OTP-Hopeaccelerated has been successfully generated. Your pin is : ${notp}`;
+
+  console.log(user)
+  try {
+
+    // await sendSMS({
+    //   phone,
+    //   message
+    // });
+
+    await sendEmail({
+      email: user.email,
+      subject: 'OTP - Hopeaccelerated',
+      message
+    });
+
+    
+
+  // const {status, email, createdAt, phone} = user
+
+  res.status(200).json({ success: true, 
+      message: 'OTP has been sent to mobile and email',
+     });
+    
+
+  } catch (err) {
+    console.log(JSON.stringify(err)); 
+
+    return next(new ErrorResponse('Email could not be sent', 500));
+  }
+
+});
+
+
 // Get token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
   // Create token
@@ -352,3 +411,4 @@ const sendTokenResponse = (user, statusCode, res) => {
       token
     });
 };
+

@@ -83,9 +83,11 @@ UserSchema.pre('save', async function(next) {
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+ 
   //generate otp
-  console.log(OTPGenerator())
+   console.log(OTPGenerator())
   this.otp = await OTPGenerator();
+console.log("###############")
   // this.qrcode = hashIt(this.phone+this.email)
 
 });

@@ -2,6 +2,7 @@ const express = require('express');
 const {
   register,
   login,
+  plogin,
   logout,
   getMe,
   forgotPassword,
@@ -18,6 +19,7 @@ const { protect } = require('../middleware/auth');
 
 router.post('/register', register);
 router.post('/login', login);
+router.post('/plogin', plogin);
 router.post('/votp', votp);
 router.put('/regenotp', regenotp);
 router.get('/logout', logout);
