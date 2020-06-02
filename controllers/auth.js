@@ -77,12 +77,12 @@ exports.votp = asyncHandler(async (req, res, next) => {
   const { email, phone, otp } = req.body;
 
   // Validate emil & password
-  if (!email || !otp || !phone) {
-    return next(new ErrorResponse('Please provide an email phone and otp', 400));
+  if ((!email || !phone) && !otp ) {
+    return next(new ErrorResponse('Please provide an email/phone and otp', 400));
   }
 
   // Check for user
-  const user = await User.findOne({ email });
+  const user = email ? await User.findOne({ email }):await User.findOne({ phone }) ;
 
   if (!user) {
     return next(new ErrorResponse('Email not found', 401));
@@ -91,8 +91,9 @@ exports.votp = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('User already verified', 401));
   }
   // Check if password matches
+  // console.log(user)
   const isMatch = parseInt(user.otp) === parseInt(otp);
-console.log(isMatch)
+// console.log(isMatch)
   if (!isMatch) {
     return next(new ErrorResponse('OTP didnt match', 401));
   }
