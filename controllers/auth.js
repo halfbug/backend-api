@@ -39,10 +39,10 @@ console.log(roleId)
 
   try {
 
-    // await sendSMS({
-    //   phone,
-    //   message
-    // });
+    await sendSMS({
+      phone,
+      message
+    });
 
     await sendEmail({
       email: user.email,
@@ -115,12 +115,12 @@ exports.regenotp = asyncHandler(async (req, res, next) => {
   const { email, phone } = req.body;
 
   // Validate emil & password
-  if (!email || !phone) {
+  if (!phone) {
     return next(new ErrorResponse('Please provide an email and phone number', 400));
   }
 
   // Check for user
-  const user = await User.findOne({ email, phone });
+  const user = await User.findOne({ phone });
 
   if (!user) {
     return next(new ErrorResponse('Email or phone not found', 401));
@@ -139,12 +139,14 @@ exports.regenotp = asyncHandler(async (req, res, next) => {
   const message = `OTP - Hopeaccelerated has been successfully generated. Your pin is : ${notp}`;
 
   try {
+    
+    if(phone)
+    await sendSMS({
+      phone,
+      message
+    });
 
-    // await sendSMS({
-    //   phone,
-    //   message
-    // });
-
+    if(email)
     await sendEmail({
       email: user.email,
       subject: 'OTP - Hopeaccelerated',
@@ -359,10 +361,10 @@ exports.plogin = asyncHandler(async (req, res, next) => {
   console.log(user)
   try {
 
-    // await sendSMS({
-    //   phone,
-    //   message
-    // });
+    await sendSMS({
+      phone,
+      message
+    });
 
     await sendEmail({
       email: user.email,

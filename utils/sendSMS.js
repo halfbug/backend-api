@@ -7,20 +7,20 @@ const sendSMS = async option => {
 const accountSid =  process.env.ACCOUNT_SID;
 const authToken =  process.env.AUTH_TOKEN;
 
-const client = new twilio(accountSid, authToken);
-console.log("sending sms--->>") 
+// const client = new twilio(accountSid, authToken);
+// console.log("sending sms--->>") 
 
-client.messages
-  .create({
-     body: option.message,
-     from:  process.env.SMS_NUMBER,
-     to: option.phone
-   })
-  .then(message =>{
-       console.log(message.sid)
+// client.messages
+//   .create({
+//      body: option.message,
+//      from:  process.env.SMS_NUMBER,
+//      to: option.phone
+//    })
+//   .then(message =>{
+//        console.log(message.sid)
       
-    })
-    .catch(error=> console.log(JSON.stringify(error)));
+//     })
+//     .catch(error=> console.log(JSON.stringify(error)));
       
 };
 
