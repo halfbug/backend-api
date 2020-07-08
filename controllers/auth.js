@@ -34,7 +34,7 @@ console.log(roleId)
   }
     
    );
-
+console.log(user.otp)
   const message = `OTP - Hopeaccelerated has been successfully generated. Your pin is : ${user.otp}`;
 
   try {
@@ -43,7 +43,8 @@ console.log(roleId)
       phone,
       message
     });
-
+  
+    if(email)
     await sendEmail({
       email: user.email,
       subject: 'OTP - Hopeaccelerated',
@@ -146,7 +147,7 @@ exports.regenotp = asyncHandler(async (req, res, next) => {
       message
     });
 
-    if(email)
+    if(!email === null)
     await sendEmail({
       email: user.email,
       subject: 'OTP - Hopeaccelerated',

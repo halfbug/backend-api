@@ -15,7 +15,8 @@ const UserSchema = new mongoose.Schema({
     match: [
       /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
       'Please add a valid email'
-    ]
+    ],
+    sparse: true
   },
   phone: {
     type: String,
@@ -77,13 +78,16 @@ const UserSchema = new mongoose.Schema({
 
 // Encrypt password using bcrypt
 UserSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
-    next();
-  }
+  // if (!this.isModified('password')) {
+  //   next();
+  // }
 
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
- 
+  if(this.password){
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+   
+  }
+  
   //generate otp
    console.log(OTPGenerator())
   this.otp = await OTPGenerator();

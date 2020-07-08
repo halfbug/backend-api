@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "hope-accelerated",
+  "private_key_id": "fb5968d94bef7e80e2d1bd7815d48bf9f213ade2",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDBPT1+CRbV2zS+\nOMnXMDb6XMGQrSpCV4yrUvvgORZPExKp0chHJvM0a3ywCvI31HVCEK83aEtH0ZLq\nlVHtgJJcBb4T28gLLcbrVIYzgIUOESnXnRu7zXmBEKDn+Pk5wUFejyISgW++pNTS\nEL3NPd2v+I/EdAr9qwfm3cxOcTVj3D6BftT1IdvQStVfSevv8py0qWU7rIFUwtOC\nns/SfjFvneUCxr3OlnbZIRGJYucngBZpaEDRxCDFk+plSNYIF8bnmWhCJbUPC052\nFb8eNXg0kYCeAnKbsAAmUaj2cShpa/xrUjL6YYb47kailIWL5cpNdugs6lJO86iD\n47AKZDVVAgMBAAECggEAINWWzgRd2rMvTFYqZ7PT16kso7hkypaFOrQ0Q6Z3lbKU\nNIJGkV57KzBLZL9LZnSlgvcCSrwgNIEWAWGjZON4mwXHxSiOXmXmG6UGU5h2I0yD\ny1Tw+jGBAI7yhFAQCwH9KUPRYosXUXHBDruVAJuPQGAQD623E2C9DDuqRDbkv0WI\ngIGucIe6ETnNmfqfLMds0GjoOMdR0o2tpPaYFypSE10EYK96f4sqEVJjZOfuQSJX\nFQA9336JqoRxiS6hm6rCHINDUsurDHFereUDQVXm9jpzmf5RdBcP5x222+HNl/1x\n2mhFmP16gA/AehiaGkOufFietTqwerrFyUkafXKI2QKBgQDzCIHCaH0RInnkr3XV\nixnpJBdlttE3SS3rfTwDQDhcDyDZNarhwfJt7DeOVv2i1GE/F9B7+mHoepR/UmXW\nBF9Np7pa/JYR2wcUxKKfYgMvJMoILv8hlWg4dmA48HOcrfXr3ZS7WRbx4GgxPnZc\np+7rMLQp0r/cOkReib1Zs9uzmQKBgQDLjJ3x86vCygDx+q5sE4gyjdu3E4gA4T3a\nliF95xk8KY9Poxx27Qhp82+xxwApycJGzUiY/XePv2fm8n3IwmIUijQUnBAvKGW9\n8txNETZC66pY5lPsSHK8NLapNk3KIRVRp/8W3+3N/5qGkc0J1GN0VVzuABvV30aC\nqTa0cUHlHQKBgGgHqyuheG+eN1kZdjILUfMHHPDQGaw1qe9UcxzdH4LgguoXW+c5\nEuHUrE9Ek1tg16OfOQHowoI1/lyl06uRwY3HDzElT8Oi4twT85yP4tcKQ2TPYSxp\n/Ou2WCfnXUWi/VKSTbkIQJcWvOLfXuD4jX+lIGmKqc/GLT/ea+v63j95AoGBAIox\nR7JSqtQubQHcHbtGb3tTEE51NirSwTm8H7ToxxsvZBq/NL4RI1s7aSObZaL5VarY\nCGfF/fxcCOCk1X0Na6ViRwWPBvXdSWXyklrISryYXyjIB0Yt0aexainrslh+qYis\ns+UF1t+6n2CpcDkyNutuYQ88h6lmUuq2k2tiUUiJAoGBAL5FmOsNAyRL4kvVI/4J\naV0jcGNaFW+JswCzzf4ft+cRp0+AQsUu5L95yKJY32MEgA1F33TKA6BlUNYtMDgJ\nrl9Bx9bLn9GGobdxYtBUb6matzd2Kzp1jNqhNUtnhpvMMR3d95M8TYjX9wpnKRjf\n/eqWVW5VSWtLJR72OctdXt05\n-----END PRIVATE KEY-----\n",
+  "client_email": "blockmed-appointments@hope-accelerated.iam.gserviceaccount.com",
+  "client_id": "108146771809354946847",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/blockmed-appointments%40hope-accelerated.iam.gserviceaccount.com"
+}
