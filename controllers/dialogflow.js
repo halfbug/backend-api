@@ -22,7 +22,7 @@ const sessionId = uuid.v4();
 // const sessionClient = new dialogflow.SessionsClient();
 const sessionClient = new dialogflow.SessionsClient({
     keyFilename: require("path").join('config/Hope Accelerated-49fe05f89795.json')
-});
+}); 
 const sessionPath = sessionClient.sessionPath(process.env.DIALOGFLOW_PROJECTID, sessionId);
 
 // The text query request.
