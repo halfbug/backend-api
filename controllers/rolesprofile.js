@@ -208,3 +208,44 @@ exports.getRpById = asyncHandler(async (req, res, next) => {
     data: profiles
   });
 });
+
+// @desc      Create Role profile
+// @route     POST /api/v1/rp/patient
+// @access    Private/Admin
+exports.addRp = asyncHandler(async (req, res, next) => {
+  console.log(req.url)
+   const name = req.params.role
+    console.log(name)
+    
+    const role = await Role.findOne({name});
+    if (!role) {
+      return next(new ErrorResponse(`${name} Not Found`, 404));
+    }
+    req.body.roleId=role._id
+
+  //get userid
+  if (!req.user) {
+   return next(new ErrorResponse(`User Not Found`, 404));
+ }
+ 
+  req.body.userId=req.user.id;
+
+  
+ //get role id
+
+
+ const rp= await RolesProfile.findOne({userId : req.user.id, roleId : role._id })
+  console.log(rp)
+  if (rp ) {
+   return next(new ErrorResponse(`User's ${name} profile already present`, 400));
+ }
+
+ // req.body.documents=[]
+ //save to database
+let rolepro = await RolesProfile.create(req.body);
+
+res.status(201).json({
+  success: true,
+  data: rolepro
+});
+});

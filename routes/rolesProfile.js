@@ -4,7 +4,8 @@ const {
     getDoctors,
     addPatient,
     getRps,
-    getRpById
+    getRpById,
+    addRp
 //   getRole,
 //   createRole,
 //   updateRole,
@@ -23,13 +24,14 @@ router.use(protect);
 
 // router
 //   .route('/doctor')
-//   .post(addDoctor)
+  // .post(addDoctor)
 //    .get(advancedResults(Role), getDoctors)
   
  
 router
   .route('/:role')
   .get(advancedResults(Role), getRps)
+  .post(addRp) 
 
 router
   .route('/:role/:id')
