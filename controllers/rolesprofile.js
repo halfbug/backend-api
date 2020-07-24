@@ -239,10 +239,55 @@ exports.addRp = asyncHandler(async (req, res, next) => {
   if (rp ) {
    return next(new ErrorResponse(`User's ${name} profile already present`, 400));
  }
-
+const values = {};
+ Object.keys(req.body).forEach((key, i) => {
+  try { values[key]=JSON.parse(req.body[key]) } catch(e) { values[key] = req.body[key] }
+  
+ });
  // req.body.documents=[]
  //save to database
-let rolepro = await RolesProfile.create(req.body);
+let rolepro = await RolesProfile.create(values);
+let documents =[];
+//save documents
+//save files''
+console.log(req.files)
+  if(req.files)  
+  Object.keys(req.files).forEach((key, i) => {
+      const file = req.files[key]
+      console.log("----------------")
+      console.log(key)
+      console.log(file)
+      if (file.size > process.env.MAX_FILE_UPLOAD) {
+        return next(
+          new ErrorResponse(
+            `Please upload an file less than ${process.env.MAX_FILE_UPLOAD}`,
+            400
+          )
+        );
+      }
+      console.log(path.parse(file.name).name)
+       // Create custom filename
+       file.name = `${rolepro._id}_${slugify(path.parse(file.name).name, { lower: true })}${path.parse(file.name).ext}`;
+
+       file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, async err => {
+             if (err) {
+               console.error(err);
+               return next(new ErrorResponse(`Problem with Document upload`, 500));
+             }
+         });
+  
+         documents.push({type : key , file : file.name});
+      
+    })
+    console.log(rolepro._id)
+// try{
+      rolepro = await RolesProfile.findByIdAndUpdate(rolepro._id, 
+        {
+          "$push": {"documents": documents}
+        },{new: true, safe: true, upsert: true }
+        )
+console.log(documents)
+        await rolepro.save();
 
 res.status(201).json({
   success: true,
