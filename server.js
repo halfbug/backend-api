@@ -86,7 +86,7 @@ app.use('/api/v1/calendar', calendar);
 
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 const server = app.listen(
   PORT,

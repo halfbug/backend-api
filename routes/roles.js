@@ -14,12 +14,15 @@ const router = express.Router({ mergeParams: true });
 const advancedResults = require('../middleware/advancedResults');
 const { protect, authorize } = require('../middleware/auth');
 
+router
+  .route('/')
+  .get(advancedResults(Role), getRoles)
+
 router.use(protect);
 // router.use(authorize('admin'));
 
 router
   .route('/')
-  .get(advancedResults(Role), getRoles)
   .post(createRole);
 
 router
