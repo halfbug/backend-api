@@ -121,7 +121,7 @@ exports.regenotp = asyncHandler(async (req, res, next) => {
   }
 
   // Check for user
-  const user = await User.findOne({ phone });
+  let user = await User.findOne({ phone });
 
   if (!user) {
     return next(new ErrorResponse('Email or phone not found', 401));
@@ -134,8 +134,10 @@ exports.regenotp = asyncHandler(async (req, res, next) => {
   }
   
   // Re Generate the OPT
-  console.log(user)
-  const notp =await user.getRegeneratedOTP();
+  
+  let notp =await user.getRegeneratedOTP();
+    user=await user.save();
+  
 
   const message = `OTP - Hopeaccelerated has been successfully generated. Your pin is : ${notp}`;
 
