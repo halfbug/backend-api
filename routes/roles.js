@@ -16,7 +16,7 @@ const { protect, authorize } = require('../middleware/auth');
 
 router
   .route('/')
-  .get(advancedResults(Role), getRoles)
+  .get(advancedResults(Role), getRoles);
 
 router.use(protect);
 // router.use(authorize('admin'));
@@ -24,7 +24,7 @@ router.use(protect);
 router
   .route('/')
   .post(createRole);
-
+ 
 router
   .route('/:id')
   .get(getRole) 

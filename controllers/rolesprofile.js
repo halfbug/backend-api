@@ -292,5 +292,5 @@ console.log(documents)
 res.status(201).json({
   success: true,
   data: rolepro
-});
+}); 
 });

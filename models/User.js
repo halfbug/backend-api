@@ -89,9 +89,10 @@ UserSchema.pre('save', async function(next) {
   }
   
   //generate otp
-   console.log(OTPGenerator())
+   console.log(this.otp)
   this.otp = await OTPGenerator();
-console.log("###############")
+console.log("########pre save#######")
+console.log(this.otp)
   // this.qrcode = hashIt(this.phone+this.email)
 
 });
