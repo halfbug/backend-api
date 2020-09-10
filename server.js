@@ -31,6 +31,7 @@ const rolesprofile = require('./routes/rolesProfile');
 const dialogflow = require('./routes/dialogflow');
 const calendar = require('./routes/calendar');
 const event = require('./routes/event');
+const questionnaire = require('./routes/questionnaire');
 
 const app = express();
 
@@ -83,7 +84,8 @@ app.use('/api/v1/socialacc', socialAccounts);
 app.use('/api/v1/rp', rolesprofile);
 app.use('/api/v1/df', dialogflow);
 app.use('/api/v1/calendar', calendar);
-app.use('/api/v1/event', event);
+app.use('/api/v1/event', event); 
+app.use('/api/v1/questionnaire', questionnaire);
 
 
 app.use(errorHandler);

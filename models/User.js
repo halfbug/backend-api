@@ -70,10 +70,12 @@ const UserSchema = new mongoose.Schema({
     default: 0
   },
   socialAcc : [ {type : mongoose.Schema.Types.ObjectId, ref : 'SocialAccounts'}],
+  questionnaireResponses : [],
   lastUpdate: {
     type: Date,
     default: Date.now
   }
+
 });
 
 // Encrypt password using bcrypt
