@@ -32,6 +32,8 @@ const dialogflow = require('./routes/dialogflow');
 const calendar = require('./routes/calendar');
 const event = require('./routes/event');
 const questionnaire = require('./routes/questionnaire');
+const product = require('./routes/product');
+const productCategory = require('./routes/productCategory');
 
 const app = express();
 
@@ -86,7 +88,8 @@ app.use('/api/v1/df', dialogflow);
 app.use('/api/v1/calendar', calendar);
 app.use('/api/v1/event', event); 
 app.use('/api/v1/questionnaire', questionnaire);
-
+app.use('/api/v1/product', product);
+app.use('/api/v1/category', productCategory);
 
 app.use(errorHandler);
 
