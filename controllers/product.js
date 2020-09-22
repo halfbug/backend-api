@@ -83,7 +83,7 @@ console.log(req.files)
        // Create custom filename
        file.name = `${product._id}_${slugify(path.parse(file.name).name, { lower: true })}${path.parse(file.name).ext}`;
 
-       file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, async err => {
+       file.mv(`${process.env.PRODUCT_UPLOD_PATH}/${file.name}`, async err => {
              if (err) {
                console.error(err);
                return next(new ErrorResponse(`Problem with Document upload`, 500));
