@@ -52,8 +52,8 @@ const Product = new mongoose.Schema(
 
         categoryId :{
             type: mongoose.Schema.ObjectId,
-            ref : 'ProductCategory',
-            required: true
+            ref : 'Category',
+            required: [true, 'Please define category Id'],
         },
 
         status : {

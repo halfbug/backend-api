@@ -18,7 +18,12 @@ const QuestionnaireSchema = new mongoose.Schema({
     required: [true, 'Please define App Id'],
    
   },
-  
+  categoryId: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Category',
+    required: [true, 'Please define category Id'],
+   
+  },
 });
 
 module.exports = mongoose.model('Questionnaire', QuestionnaireSchema);
