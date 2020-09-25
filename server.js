@@ -33,7 +33,7 @@ const calendar = require('./routes/calendar');
 const event = require('./routes/event');
 const questionnaire = require('./routes/questionnaire');
 const product = require('./routes/product');
-const category = require('./routes/category');
+const ategory = require('./routes/category');
 
 const app = express();
 
@@ -75,6 +75,7 @@ app.use(cors());
 
 // Set static folder
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public/images/products')));
 
 // Mount routers
 app.use('/api/v1/auth', auth);
@@ -89,7 +90,7 @@ app.use('/api/v1/calendar', calendar);
 app.use('/api/v1/event', event); 
 app.use('/api/v1/questionnaire', questionnaire);
 app.use('/api/v1/product', product);
-app.use('/api/v1/category', category);
+app.use('/api/v1/category', ategory);
 
 app.use(errorHandler);
 
