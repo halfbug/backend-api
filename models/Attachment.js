@@ -20,6 +20,9 @@ const AttachmentSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please add the mimeType'],
     },
+    size: {
+        type: Number,
+    },
     relativePath: {
         type: String,
         required: [true, 'Please add the relativePath'],

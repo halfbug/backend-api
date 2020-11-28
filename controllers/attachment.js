@@ -2,7 +2,8 @@ const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const path = require('path');
 const slugify = require('slugify');
-// const User = require('../models/User');
+const { attachmentsRelatedTo } = require('../contstants/attachment');
+const Attachment = require('../models/Attachment');
 
 
 // const storage = multer.diskStorage({
@@ -24,38 +25,53 @@ exports.upload = asyncHandler(async (req, res, next) => {
   console.log(req.files)
   if (req.files) {
     console.log('file is uploaded');
+    let record = {};
     Object.keys(req.files).forEach((key, i) => {
       const file = req.files[key]
       console.log("----------------")
       console.log(key)
       console.log(file)
-      // if (path.parse(file.name).ext > process.env.MAX_FILE_UPLOAD) {
-      //   return next(
-      //     new ErrorResponse(
-      //       `Please upload an file less than ${process.env.MAX_FILE_UPLOAD}`,
-      //       400
-      //     )
-      //   );
-      // }
-      // if (file.size > process.env.MAX_FILE_UPLOAD) {
-      //   return next(
-      //     new ErrorResponse(
-      //       `Please upload an file less than ${process.env.MAX_FILE_UPLOAD}`,
-      //       400
-      //     )
-      //   );
-      // }
+      if (path.parse(file.name).ext > process.env.MAX_FILE_UPLOAD) {
+        return next(
+          new ErrorResponse(
+            `Please upload an file less than ${process.env.MAX_FILE_UPLOAD}`,
+            400
+          )
+        );
+      }
+      if (!attachmentsRelatedTo.kycDoc.includes(req.body.relatedTo)) {
+        return next(
+          new ErrorResponse(
+            `Uploaded attachment is not related to any KYC document`,
+            400
+          )
+        );
+      }
       console.log(path.parse(file.name).name)
       // Create custom filename
-      file.name = `${slugify(path.parse(file.name).name, { lower: true })}${path.parse(file.name).ext}`;
-
-      file.mv(`${process.env.ATTACHMENT_UPLOD_PATH}/${file.name}`, async err => {
+      const extension = path.parse(file.name).ext;
+      const customName = `${Date.now()}_${path.parse(file.name).name.split('.')[0]}`;
+      file.name = `${slugify(path.parse(file.name).name, { lower: true })}${extension}`;
+      file.mv(`${process.env.ATTACHMENT_UPLOD_PATH}/${customName}${extension}`, async err => {
         if (err) {
           console.error(err);
           return next(new ErrorResponse(`Problem with Document upload`, 500));
         }
       });
+      record.userId = "123123"
+      record.originalName = file.name.split('.')[0];
+      record.customName = customName;
+      record.extension = extension;
+      record.mimeType = file.mimetype;
+      record.size = file.size;
+      record.relativePath = process.env.ATTACHMENT_UPLOD_PATH;
+      record.relatedTo = req.body.relatedTo;
+
       console.log('call the db model to insert the data now');
+
+      const attachment = Attachment.create(record);
+
+      console.log(`attachment record is inserted`);
 
     });
   }
