@@ -1,7 +1,7 @@
 const express = require('express');
 const {
   upload,
-  download,
+  view,
 } = require('../controllers/attachment');
 
 const router = express.Router({ mergeParams: true });
@@ -10,6 +10,6 @@ const router = express.Router({ mergeParams: true });
 // router.use(authorize('admin'));
 
 router.post('/upload', upload);
-router.get('/download', download);
+router.get('/view/:id', view);
 
 module.exports = router;

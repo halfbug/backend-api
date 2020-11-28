@@ -95,6 +95,8 @@ app.use('/api/v1/category', category);
 
 app.use('/api/v1/attachment', attachment);
 
+app.use('/api/v1/kyc', users);
+
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5001;

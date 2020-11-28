@@ -1,6 +1,7 @@
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const path = require('path');
+const fs = require('fs');
 const slugify = require('slugify');
 const { attachmentsRelatedTo } = require('../contstants/attachment');
 const Attachment = require('../models/Attachment');
@@ -52,7 +53,7 @@ exports.upload = asyncHandler(async (req, res, next) => {
       const extension = path.parse(file.name).ext;
       const customName = `${Date.now()}_${path.parse(file.name).name.split('.')[0]}`;
       file.name = `${slugify(path.parse(file.name).name, { lower: true })}${extension}`;
-      file.mv(`${process.env.ATTACHMENT_UPLOD_PATH}/${customName}${extension}`, async err => {
+      file.mv(`.${process.env.ATTACHMENT_UPLOD_PATH}/${customName}${extension}`, async err => {
         if (err) {
           console.error(err);
           return next(new ErrorResponse(`Problem with Document upload`, 500));
@@ -87,15 +88,32 @@ exports.upload = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc      download attachment
-// @route     POST /api/v1/attachment/download
+// @desc      view attachment
+// @route     GET /api/v1/view/download
 // @access    Public
-exports.download = asyncHandler(async (req, res, next) => {
-  console.log(req.body)
-  const user = await User.create(req.body);
+exports.view = asyncHandler(async (req, res, next) => {
 
-  res.status(201).json({
-    success: true,
-    data: user
-  });
+  let attachment = await Attachment.findById(req.params.id);
+
+  // const { file, mimeType } = await Image.download(id, res);
+  // res.header('content-type', mimeType);
+  // // res.send(file);
+
+  if (attachment == false || attachment == undefined || attachment == null || attachment == "") {
+    res.status(404).json({
+      success: false,
+      data: "NULL"
+    });
+  }
+
+  const {
+    customName, relativePath, extension, mimeType,
+  } = attachment;
+
+  console.log(`${process.cwd()}${relativePath}/${customName}${extension}`);
+  
+  const file = fs.readFileSync(`${process.cwd()}${relativePath}/${customName}${extension}`);
+
+  res.header('content-type', mimeType);
+  res.send(file);
 });

@@ -60,3 +60,18 @@ exports.deleteUser = asyncHandler(async (req, res, next) => {
     data: {}
   });
 });
+
+// @desc      Verify KYC document
+// @route     PUT /api/v1/kyc/:id
+// @access    Private/Admin
+exports.verifyKycDoc = asyncHandler(async (req, res, next) => {
+  const user = await User.findByIdAndUpdate(req.params.id, { isKycDocVerified: true }, {
+    new: false,
+    runValidators: true
+  });
+
+  res.status(200).json({
+    success: true,
+    data: 'KYC Document for the provided User are verified successfully'
+  });
+});
