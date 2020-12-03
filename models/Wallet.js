@@ -22,7 +22,23 @@ const WalletSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: 'App',
     required: [true, 'Please define app']
-  }
+  },
+
+  action: {
+    type: [],
+    required: [true, 'Please define the actions']    
+  },
+
+  balance: {
+    type: Number,
+    required: [true, 'Please set the balance']
+  },
+
+  balanceCurrency: {
+    type: String,
+    required: [true, 'Please set the balance currency']
+  },
+
 });
 
 // Prevent user from submitting more than one review per bootcamp
@@ -61,4 +77,4 @@ WalletSchema.pre('remove', function() {
   this.constructor.getAverageRating(this.bootcamp);
 });
 
-module.exports = mongoose.model('Review', WalletSchema);
+module.exports = mongoose.model('Wallet', WalletSchema);
