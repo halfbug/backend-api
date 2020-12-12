@@ -13,6 +13,6 @@ router.use(authorize('user'));
 
 router
   .get('/', getUserWallet)
-  .post('/', createUserWallet);
+  // .post('/', createUserWallet); //not required now as wallet will be explicitly create once user kyc doc is verified
 
 module.exports = router;
