@@ -33,7 +33,9 @@ const calendar = require('./routes/calendar');
 const event = require('./routes/event');
 const questionnaire = require('./routes/questionnaire');
 const product = require('./routes/product');
-const ategory = require('./routes/category');
+const category = require('./routes/category');
+const attachment = require('./routes/attachment');
+const wallet = require('./routes/wallet');
 
 const app = express();
 
@@ -90,7 +92,11 @@ app.use('/api/v1/calendar', calendar);
 app.use('/api/v1/event', event); 
 app.use('/api/v1/questionnaire', questionnaire);
 app.use('/api/v1/product', product);
-app.use('/api/v1/category', ategory);
+app.use('/api/v1/category', category);
+
+app.use('/api/v1/attachment', attachment);
+app.use('/api/v1/kyc', users);
+app.use('/api/v1/user/wallet', wallet);
 
 app.use(errorHandler);
 

@@ -1,6 +1,7 @@
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const User = require('../models/User');
+const Wallet = require('../models/Wallet');
 
 // @desc      Get all users
 // @route     GET /api/v1/users
@@ -58,5 +59,25 @@ exports.deleteUser = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     data: {}
+  });
+});
+
+// @desc      Verify KYC document & Create Wallet for User
+// @route     PUT /api/v1/kyc/:id
+// @access    Private/Admin
+exports.verifyKycDoc = asyncHandler(async (req, res, next) => {
+  const user = await User.findByIdAndUpdate(req.params.id, { isKycDocVerified: true }, {
+    new: false,
+    runValidators: true
+  });
+
+  if (user) {
+    req.body.userId = req.params.id;
+    await Wallet.create(req.body);
+  }
+
+  res.status(200).json({
+    success: true,
+    data: 'KYC Document for the provided User are verified successfully and Wallet is also created'
   });
 });

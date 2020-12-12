@@ -74,8 +74,11 @@ const UserSchema = new mongoose.Schema({
   lastUpdate: {
     type: Date,
     default: Date.now
-  }
-
+  },
+  isKycDocVerified : {
+    type: Boolean,
+    default: 0
+  },
 });
 
 // Encrypt password using bcrypt
