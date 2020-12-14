@@ -41,7 +41,7 @@ const WalletSchema = new mongoose.Schema({
 
 });
 
-// Prevent user from creating multiple wallets
-// WalletSchema.index({ userId: 1 }, { unique: true });
+// Prevent user from creating multiple
+WalletSchema.index({ userId: 1 }, { unique: true });
 
 module.exports = mongoose.model('Wallet', WalletSchema);
