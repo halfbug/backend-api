@@ -28,7 +28,7 @@ exports.getUserWallet = asyncHandler(async (req, res, next) => {
     }
     else {
         // 'User not authorized to access the wallets details. Need to attach KYC documents'
-        res.status(200).json({
+        res.status(401).json({
             success: false,
             data: []
         });
