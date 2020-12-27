@@ -79,6 +79,10 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: 0
   },
+  isKycDocSubmitted : {
+    type: Boolean,
+    default: 0
+  },
 });
 
 // Encrypt password using bcrypt

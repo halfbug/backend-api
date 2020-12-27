@@ -5,7 +5,7 @@ const fs = require('fs');
 const slugify = require('slugify');
 const { attachmentsRelatedTo } = require('../contstants/attachment');
 const Attachment = require('../models/Attachment');
-
+const User = require('../models/User');
 
 // const storage = multer.diskStorage({
 //   destination: (req, file, cb) => {
@@ -23,7 +23,6 @@ const Attachment = require('../models/Attachment');
 // @route     POST /api/v1/attachment/upload
 // @access    Public
 exports.upload = asyncHandler(async (req, res, next) => {
-  console.log(req.files)
   if (req.files) {
     console.log('file is uploaded');
     let record = {};
@@ -59,7 +58,7 @@ exports.upload = asyncHandler(async (req, res, next) => {
           return next(new ErrorResponse(`Problem with Document upload`, 500));
         }
       });
-      record.userId = "123123"
+      record.userId = req.user._id;
       record.originalName = file.name.split('.')[0];
       record.customName = customName;
       record.extension = extension;
@@ -72,16 +71,17 @@ exports.upload = asyncHandler(async (req, res, next) => {
 
       const attachment = Attachment.create(record);
 
-      console.log(`attachment record is inserted`);
-
+      User.findByIdAndUpdate(req.user._id, { isKycDocSubmitted: true }, {
+        new: false,
+        runValidators: true
+      });
+      
+      console.log(`attachment record is inserted, ${JSON.stringify(userUpdateResult)}`);
     });
   }
   else {
     console.log('file is not uploaded')
   }
-
-  // const user = await User.findById(req.params.id);
-
   res.status(200).json({
     success: true,
     data: "KYC-Document is uploaded successfully. Will notify you once it is verified"
@@ -111,7 +111,7 @@ exports.view = asyncHandler(async (req, res, next) => {
   } = attachment;
 
   console.log(`${process.cwd()}${relativePath}/${customName}${extension}`);
-  
+
   const file = fs.readFileSync(`${process.cwd()}${relativePath}/${customName}${extension}`);
 
   res.header('content-type', mimeType);
