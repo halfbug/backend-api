@@ -1,4 +1,5 @@
 const express = require('express');
+const { protect } = require('../middleware/auth');
 const {
   upload,
   view,
@@ -6,7 +7,7 @@ const {
 
 const router = express.Router({ mergeParams: true });
 
-// router.use(protect);
+router.use(protect);
 // router.use(authorize('admin'));
 
 router.post('/upload', upload);
