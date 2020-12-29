@@ -7,18 +7,6 @@ const { attachmentsRelatedTo } = require('../contstants/attachment');
 const Attachment = require('../models/Attachment');
 const User = require('../models/User');
 
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, 'attachments/');
-//   },
-//   filename: (req, file, cb) => {
-//     cb(null, `${Date.now()}_${file.originalname}`);
-//   },
-// });
-
-// const upload = multer({ storage });
-
-
 // @desc      upload attachment
 // @route     POST /api/v1/attachment/upload
 // @access    Public
@@ -69,15 +57,15 @@ exports.upload = asyncHandler(async (req, res, next) => {
 
       console.log('call the db model to insert the data now');
 
-      const attachment = Attachment.create(record);
+      Attachment.create(record);
 
-      User.findByIdAndUpdate(req.user._id, { isKycDocSubmitted: true }, {
-        new: false,
-        runValidators: true
-      });
-      
-      console.log(`attachment record is inserted, ${JSON.stringify(userUpdateResult)}`);
+      console.log(`attachment record is inserted`);
     });
+    const result = await User.findByIdAndUpdate(req.user._id, { isKycDocSubmitted: true }, {
+      new: false,
+      runValidators: true
+    });
+    console.log(`User record is updated`);
   }
   else {
     console.log('file is not uploaded')
