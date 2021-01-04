@@ -1,7 +1,8 @@
 const express = require('express');
 const {
   walletCreated,
-  instantMessageSentReceived
+  instantMessageSentReceived,
+  paymentSent
 } = require('../controllers/pushNotification');
 const { protect } = require('../middleware/auth');
 
@@ -14,5 +15,8 @@ router
 
 router
   .post('/instant/message', instantMessageSentReceived)
+
+router
+  .post('/payment/sent', paymentSent)
 
 module.exports = router;
