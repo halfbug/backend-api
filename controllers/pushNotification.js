@@ -18,7 +18,13 @@ exports.walletCreated = asyncHandler(async (req, res, next) => {
 
     const userData = await User.findById(userId);
 
-    console.log(`User ${userData.deviceIds}`);
+    if (userData === undefined || userData === null) {
+        return res.status(400).json({
+            success: false,
+            data: 'User not found.'
+        });
+    }
+
 
     // No devices registered yet?
     if (userData.deviceIds.length === 0) {
@@ -151,5 +157,70 @@ exports.instantMessageSentReceived = asyncHandler(async (req, res, next) => {
     return res.status(201).json({
         success: true,
         data: 'Sender and Receivers are successfully notified on their Devices'
+    });
+});
+
+// @desc      Notify Receiver About Consume sents the payment
+// @route     POST /api/v1/notification/payment/sent
+// @access    Private/Authorized User
+exports.paymentSent = asyncHandler(async (req, res, next) => {
+
+    const { userId, notificationMessage } = req.body;
+
+    // Get device-id of provided User from the User table
+    // Use Pushy npm to send the push notification with the provided payload
+
+    const userData = await User.findById(userId);
+
+    console.log(`User ${userData.deviceIds}`);
+
+    if (userData === undefined || userData === null) {
+        return res.status(400).json({
+            success: false,
+            data: 'User not found.'
+        });
+    }
+
+    // No devices registered yet?
+    if (userData.deviceIds.length === 0) {
+        return res.status(500).json({
+            success: false,
+            data: 'Please register the device for the provided User before attempting to send any notification.'
+        });
+    }
+
+    const api = new Pushy(process.env.PUSHY_SECRET_API_KEY);
+
+    // Set push payload data to deliver to devices
+    const data = {
+        message: notificationMessage
+    };
+
+    // Set sample iOS notification fields
+    const options = {
+        notification: {
+            badge: 1,
+            sound: null,
+            body: null
+        },
+    };
+
+    // Send push notification
+    api.sendPushNotification(data, userData.deviceIds, options, function (err, id) {
+        // Request failed?
+        if (err) {
+            console.log(err);
+            return res.status(500).json({
+                success: false,
+                data: 'Internal Server Error occurred'
+            });
+        }
+
+        // Push sent successfully
+        return res.status(201).json({
+            success: true,
+            pushId: id,
+            data: 'Receiver is successfully notified on his / her Device'
+        });
     });
 });
