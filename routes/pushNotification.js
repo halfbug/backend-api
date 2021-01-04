@@ -1,16 +1,18 @@
 const express = require('express');
 const {
-  notifyUserAboutWalletCreated
+  walletCreated,
+  instantMessageSentReceived
 } = require('../controllers/pushNotification');
+const { protect } = require('../middleware/auth');
 
 const router = express.Router({ mergeParams: true });
 
-// const { protect, authorize } = require('../middleware/auth');
-
-// router.use(protect);
-// router.use(authorize('user'));
+router.use(protect);
 
 router
-  .post('/wallet/created', notifyUserAboutWalletCreated)
+  .post('/wallet/created', walletCreated)
+
+router
+  .post('/instant/message', instantMessageSentReceived)
 
 module.exports = router;
