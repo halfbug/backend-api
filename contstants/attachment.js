@@ -1,7 +1,6 @@
 const attachmentsRelatedTo = {
     kycDoc: [
-        'kyc_doc_govt_id',
-        'kyc_doc_proof_of_address'
+        'kyc_govt_id_proof_of_address'
     ]
 };
 
