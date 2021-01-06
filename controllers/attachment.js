@@ -51,20 +51,15 @@ exports.upload = asyncHandler(async (req, res, next) => {
       record.relativePath = process.env.ATTACHMENT_UPLOD_PATH;
       record.relatedTo = req.body.relatedTo;
 
-      console.log('call the db model to insert the data now');
-
       Attachment.create(record);
-
-      console.log(`attachment record is inserted`);
     });
     const result = await User.findByIdAndUpdate(req.user._id, { isKycDocSubmitted: true }, {
       new: false,
       runValidators: true
     });
-    console.log(`User record is updated`);
   }
   else {
-    console.log('file is not uploaded')
+    console.log('file is not attached')
     res.status(400).json({
       success: true,
       data: "KYC-Document(s) are not attached. Please attached them first"
@@ -82,7 +77,7 @@ exports.upload = asyncHandler(async (req, res, next) => {
 exports.uploadKycDocs = asyncHandler(async (req, res, next) => {
 
   if (req.files) {
-    console.log(`file is attached ${JSON.stringify(req.files)}`);
+    console.log(`file is attached`);
     let record = {};
     if (Array.isArray(req.files.file)) {
       req.files.file.forEach((key) => {
@@ -148,11 +143,7 @@ exports.uploadKycDocs = asyncHandler(async (req, res, next) => {
         record.relativePath = process.env.ATTACHMENT_UPLOD_PATH;
         record.relatedTo = attachmentsRelatedTo.kycDoc[0];
 
-        console.log('call the db model to insert the data now');
-
         Attachment.create(record);
-
-        console.log(`attachment record is inserted`);
       });
     }
 
