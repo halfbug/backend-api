@@ -1,4 +1,5 @@
 const ErrorResponse = require('../utils/errorResponse');
+const sendPushNotification = require('../utils/sendPushNotification');
 const asyncHandler = require('../middleware/async');
 const User = require('../models/User');
 const Role = require('../models/Role');
@@ -25,7 +26,6 @@ exports.walletCreated = asyncHandler(async (req, res, next) => {
         });
     }
 
-
     // No devices registered yet?
     if (userData.deviceIds.length === 0) {
         return res.status(500).json({
@@ -33,8 +33,6 @@ exports.walletCreated = asyncHandler(async (req, res, next) => {
             data: 'Please register the device for the provided User before attempting to send any notification.'
         });
     }
-
-    const api = new Pushy(process.env.PUSHY_SECRET_API_KEY);
 
     // Set push payload data to deliver to devices
     const data = {
@@ -51,30 +49,20 @@ exports.walletCreated = asyncHandler(async (req, res, next) => {
     };
 
     // Send push notification
-    api.sendPushNotification(data, userData.deviceIds, options, function (err, id) {
-        // Request failed?
-        if (err) {
-            console.log(err);
-            return res.status(500).json({
-                success: false,
-                data: 'Internal Server Error occurred'
-            });
-        }
+    await sendPushNotification(data, userData.deviceIds, options);
 
-        // Push sent successfully
-        return res.status(201).json({
-            success: true,
-            pushId: id,
-            data: 'User is successfully notified on his / her Device'
-        });
+    return res.status(201).json({
+        success: true,
+        // pushId: id,
+        data: 'User is successfully notified on his / her Device'
     });
 });
 
 
 // @desc      Notify Sender & Receiver about Instant message sent / received
-// @route     POST /api/v1/notification/instant/message
+// @route     POST /api/v1/notification/consumer/seller/instant/message
 // @access    Private/Authorized User
-exports.instantMessageSentReceived = asyncHandler(async (req, res, next) => {
+exports.consumerSellerInstantMessageSentReceived = asyncHandler(async (req, res, next) => {
 
     const { senderId, receiverId, senderMessage, receiverMessage } = req.body;
 
@@ -88,38 +76,20 @@ exports.instantMessageSentReceived = asyncHandler(async (req, res, next) => {
     if (userData.length === 0) {
         return res.status(400).json({
             success: false,
-            data: 'Users not exist'
+            data: 'Users does not exist'
         });
     }
-    const api = new Pushy(process.env.PUSHY_SECRET_API_KEY);
+
+    const allSenderIds = [];
+    const allReceiverIds = [];
 
     userData.map((record) => {
         // sender Part
         if (record._id == senderId) {
-
             console.log(`Sender Part`);
-
             if (record.deviceIds.length > 0) {
-                // Set push payload data to deliver to devices
-                const data = {
-                    message: senderMessage
-                };
-
-                // Set sample iOS notification fields
-                const options = {
-                    notification: {
-                        badge: 1,
-                        sound: null,
-                        body: null
-                    },
-                };
-
-                // Send push notification
-                api.sendPushNotification(data, record.deviceIds, options, function (err, id) {
-                    // Request failed?
-                    if (err) {
-                        console.log(`Error occurred in sending push`);
-                    }
+                record.deviceIds.forEach((id) => {
+                    allSenderIds.push(id);
                 });
             }
         }
@@ -128,30 +98,38 @@ exports.instantMessageSentReceived = asyncHandler(async (req, res, next) => {
         if (record._id == receiverId) {
             console.log(`Receiver Part`);
             if (record.deviceIds.length > 0) {
-                // Set push payload data to deliver to devices
-                const data = {
-                    message: receiverMessage
-                };
-
-                // Set sample iOS notification fields
-                const options = {
-                    notification: {
-                        badge: 1,
-                        sound: null,
-                        body: null
-                    },
-                };
-
-                // Send push notification
-                api.sendPushNotification(data, record.deviceIds, options, function (err, id) {
-                    // Request failed?
-                    if (err) {
-                        console.log(`Error occurred in sending push`);
-                    }
+                record.deviceIds.forEach((id) => {
+                    allReceiverIds.push(id);
                 });
             }
         }
     });
+
+    if (allSenderIds.length > 0) {
+        // Send push notification to Senders
+        await sendPushNotification({
+            message: senderMessage
+        }, allSenderIds, {
+            notification: {
+                badge: 1,
+                sound: null,
+                body: null
+            },
+        });
+    }
+
+    if (allReceiverIds.length > 0) {
+        // Send push notification to Receivers
+        await sendPushNotification({
+            message: receiverMessage
+        }, allReceiverIds, {
+            notification: {
+                badge: 1,
+                sound: null,
+                body: null
+            },
+        });
+    }
 
     // Push sent successfully
     return res.status(201).json({
@@ -160,26 +138,26 @@ exports.instantMessageSentReceived = asyncHandler(async (req, res, next) => {
     });
 });
 
-// @desc      Notify Receiver About Consume sents the payment
-// @route     POST /api/v1/notification/payment/sent
+// @desc      Notify Receiver About Consumer sents the payment
+// @route     POST /api/v1/notification/consumer/seller/payment/sent
 // @access    Private/Authorized User
-exports.paymentSent = asyncHandler(async (req, res, next) => {
+exports.consumerSellerPaymentSent = asyncHandler(async (req, res, next) => {
 
-    const { userId, notificationMessage } = req.body;
+    const { sellerId, notificationMessage } = req.body;
+
+    const roleData = await Role.findOne({ "name": "seller" });
 
     // Get device-id of provided User from the User table
     // Use Pushy npm to send the push notification with the provided payload
-
-    // first fetch objectId of seller and consumer then 
-    // use find query to find the accurate User
-    const userData = await User.findById(userId);
-
-    console.log(`User ${userData.deviceIds}`);
+    
+    const userData = await User.findOne({
+        $and: [{ "_id": ObjectId(userId) }, { "roles": { $in: ObjectId(roleData._id) } }]
+    });
 
     if (userData === undefined || userData === null) {
         return res.status(400).json({
             success: false,
-            data: 'User not found.'
+            data: 'User not found or User is not a seller.'
         });
     }
 
@@ -190,8 +168,6 @@ exports.paymentSent = asyncHandler(async (req, res, next) => {
             data: 'Please register the device for the provided User before attempting to send any notification.'
         });
     }
-
-    const api = new Pushy(process.env.PUSHY_SECRET_API_KEY);
 
     // Set push payload data to deliver to devices
     const data = {
@@ -208,25 +184,13 @@ exports.paymentSent = asyncHandler(async (req, res, next) => {
     };
 
     // Send push notification
-    api.sendPushNotification(data, userData.deviceIds, options, function (err, id) {
-        // Request failed?
-        if (err) {
-            console.log(err);
-            return res.status(500).json({
-                success: false,
-                data: 'Internal Server Error occurred'
-            });
-        }
+    await sendPushNotification(data, userData.deviceIds, options);
 
-        // Push sent successfully
-        return res.status(201).json({
-            success: true,
-            pushId: id,
-            data: 'Receiver is successfully notified on his / her Device'
-        });
+    return res.status(201).json({
+        success: true,
+        data: 'Seller is successfully notified on his / her Device'
     });
 });
-
 
 // @desc      Notify Customers about the Re-fill of Stock
 // @route     POST /api/v1/notification/stock/refill
@@ -367,84 +331,83 @@ exports.purchaseMadeNotification = asyncHandler(async (req, res, next) => {
     });
 });
 
+// // @desc      Notify Seller about purchase made by the Customer
+// // @route     POST /api/v1/notification/purchase/made
+// // @access    Private/Authorized User
+// exports.purchaseMadeNotification = asyncHandler(async (req, res, next) => {
 
-// @desc      Notify Seller about purchase made by the Customer
-// @route     POST /api/v1/notification/purchase/made
-// @access    Private/Authorized User
-exports.purchaseMadeNotification = asyncHandler(async (req, res, next) => {
+//     // customer id to fetch the customer name
+//     const { sellerId, customerId, notificationMessage } = req.body;
 
-    // customer id to fetch the customer name
-    const { sellerId, customerId, notificationMessage } = req.body;
+//     // Get device-id of provided User from the User table
+//     // Use Pushy npm to send the push notification with the provided payload
 
-    // Get device-id of provided User from the User table
-    // Use Pushy npm to send the push notification with the provided payload
+//     // first fetch objectId of consumer role then 
+//     // use find query with where in clause
+//     // to find the accurate User
 
-    // first fetch objectId of consumer role then 
-    // use find query with where in clause
-    // to find the accurate User
+//     const customerProfile = await Profile.find({ userId: ObjectId(customerId) });
 
-    const customerProfile = await Profile.find({ userId: ObjectId(customerId) });
+//     if (!customerProfile) {
+//         return res.status(400).json({
+//             success: false,
+//             data: 'Customer not found.'
+//         });
+//     }
 
-    if (!customerProfile) {
-        return res.status(400).json({
-            success: false,
-            data: 'Customer not found.'
-        });
-    }
+//     // first fetch objectId of consumer role then 
+//     // use find query with where in clause
+//     // to find the accurate User
 
-    // first fetch objectId of consumer role then 
-    // use find query with where in clause
-    // to find the accurate User
+//     const seller = await User.find(sellerId);
 
-    const seller = await User.find(sellerId);
+//     if (!seller) {
+//         return res.status(400).json({
+//             success: false,
+//             data: 'Seller not found.'
+//         });
+//     }
 
-    if (!seller) {
-        return res.status(400).json({
-            success: false,
-            data: 'Seller not found.'
-        });
-    }
+//     if (!seller.deviceIds.length === 0) {
+//         return res.status(500).json({
+//             success: false,
+//             data: 'Please register the device for the provided Seller before attempting to send any notification.'
+//         });
+//     }
 
-    if (!seller.deviceIds.length === 0) {
-        return res.status(500).json({
-            success: false,
-            data: 'Please register the device for the provided Seller before attempting to send any notification.'
-        });
-    }
+//     const api = new Pushy(process.env.PUSHY_SECRET_API_KEY);
 
-    const api = new Pushy(process.env.PUSHY_SECRET_API_KEY);
+//     // Set push payload data to deliver to devices
+//     const data = {
+//         message: notificationMessage
+//     };
 
-    // Set push payload data to deliver to devices
-    const data = {
-        message: notificationMessage
-    };
+//     // Set sample iOS notification fields
+//     const options = {
+//         notification: {
+//             badge: 1,
+//             sound: null,
+//             body: null
+//         },
+//     };
 
-    // Set sample iOS notification fields
-    const options = {
-        notification: {
-            badge: 1,
-            sound: null,
-            body: null
-        },
-    };
+//     // Send push notification
+//     api.sendPushNotification(data, userData.deviceIds, options, function (err, id) {
+//         // Request failed?
+//         if (err) {
+//             console.log(`erro in sending push notification ${err}`);
+//         }
+//     });
 
-    // Send push notification
-    api.sendPushNotification(data, userData.deviceIds, options, function (err, id) {
-        // Request failed?
-        if (err) {
-            console.log(`erro in sending push notification ${err}`);
-        }
-    });
+//     // Push sent successfully
+//     return res.status(201).json({
+//         success: true,
+//         pushId: id,
+//         data: 'Seller is successfully notified on their Devices'
+//     });
+// });
 
-    // Push sent successfully
-    return res.status(201).json({
-        success: true,
-        pushId: id,
-        data: 'Seller is successfully notified on their Devices'
-    });
-});
 
-// Mudi 18 query
 // @desc      Notify Patient about the Payment Receive
 // @route     POST /api/v1/notification/patient/payment-receive
 // @access    Private/Authorized User
@@ -522,86 +485,8 @@ exports.patientPaymentReceiveNotification = asyncHandler(async (req, res, next) 
 });
 
 
-// Mudi 19 query
-// @desc      Notify Patient about the Payment Receive
-// @route     POST /api/v1/notification/patient/payment-receive
-// @access    Private/Authorized User
-exports.patientPaymentReceiveNotification = asyncHandler(async (req, res, next) => {
-
-    // customer id to fetch the customer name
-    const { sellerId, customerId, notificationMessage } = req.body;
-
-    // Get device-id of provided User from the User table
-    // Use Pushy npm to send the push notification with the provided payload
-
-    // first fetch objectId of consumer role then 
-    // use find query with where in clause
-    // to find the accurate User
-
-    const customerProfile = await Profile.find({ userId: ObjectId(customerId) });
-
-    if (!customerProfile) {
-        return res.status(400).json({
-            success: false,
-            data: 'Customer not found.'
-        });
-    }
-
-    // first fetch objectId of consumer role then 
-    // use find query with where in clause
-    // to find the accurate User
-
-    const seller = await User.find(sellerId);
-
-    if (!seller) {
-        return res.status(400).json({
-            success: false,
-            data: 'Seller not found.'
-        });
-    }
-
-    if (!seller.deviceIds.length === 0) {
-        return res.status(500).json({
-            success: false,
-            data: 'Please register the device for the provided Seller before attempting to send any notification.'
-        });
-    }
-
-    const api = new Pushy(process.env.PUSHY_SECRET_API_KEY);
-
-    // Set push payload data to deliver to devices
-    const data = {
-        message: notificationMessage
-    };
-
-    // Set sample iOS notification fields
-    const options = {
-        notification: {
-            badge: 1,
-            sound: null,
-            body: null
-        },
-    };
-
-    // Send push notification
-    api.sendPushNotification(data, userData.deviceIds, options, function (err, id) {
-        // Request failed?
-        if (err) {
-            console.log(`erro in sending push notification ${err}`);
-        }
-    });
-
-    // Push sent successfully
-    return res.status(201).json({
-        success: true,
-        pushId: id,
-        data: 'Seller is successfully notified on their Devices'
-    });
-});
-
-
-// Mudi 18 query
-// @desc      Notify Patient about the Payment Receive
+// Ed 18 
+// @desc      Notify User about the Free Course on Google Class Room
 // @route     POST /api/v1/notification/free/course
 // @access    Private/Authorized User
 exports.freeCourseNotification = asyncHandler(async (req, res, next) => {
@@ -613,9 +498,19 @@ exports.freeCourseNotification = asyncHandler(async (req, res, next) => {
     // first fetch objectId of student role then 
     // use find query to fetch all student deviceIds
 
-    const userData = await User.find(userId);
+    const roleData = await Role.findOne({ "name": "student" });
 
-    console.log(`User ${userData.deviceIds}`);
+    console.log(`role data ${roleData}`);
+
+    if (roleData == null || roleData == undefined) {
+        // Push sent successfully
+        return res.status(500).json({
+            success: false,
+            data: 'Student role is not defined'
+        });
+    }
+
+    const userData = await User.find({ "roles": { $in: ObjectId(roleData._id) } });
 
     if (userData.length === 0) {
         return res.status(400).json({
@@ -624,39 +519,52 @@ exports.freeCourseNotification = asyncHandler(async (req, res, next) => {
         });
     }
 
+    console.log(`User Data ${JSON.stringify(userData)}`);
+
+    const allDeviceIds = [];
+
     userData.forEach((item) => {
+        console.log(`Iterating on each User ${item.email}`);
+
         // No devices registered yet?
         if (item.deviceIds.length > 0) {
-            const api = new Pushy(process.env.PUSHY_SECRET_API_KEY);
 
-            // Set push payload data to deliver to devices
-            const data = {
-                message: notificationMessage
-            };
+            console.log(`device ids are available`);
 
-            // Set sample iOS notification fields
-            const options = {
-                notification: {
-                    badge: 1,
-                    sound: null,
-                    body: null
-                },
-            };
-
-            // Send push notification
-            api.sendPushNotification(data, userData.deviceIds, options, function (err, id) {
-                // Request failed?
-                if (err) {
-                    console.log(`erro in sending push notification ${err}`);
-                }
+            item.deviceIds.forEach((deviceId) => {
+                console.log(`Iterating on the device id of each User`);
+                allDeviceIds.push(deviceId);
             });
         }
+        else {
+            console.log(`device ids are not available`);
+        }
     });
+
+    // Set push payload data to deliver to devices
+    const data = {
+        message: notificationMessage
+    };
+
+    // Set sample iOS notification fields
+    const options = {
+        notification: {
+            badge: 1,
+            sound: null,
+            body: null
+        },
+    };
+
+    if (allDeviceIds.length > 0) {
+        // Send push notification
+        await sendPushNotification(data, allDeviceIds, options);
+    }
+
+    console.log('sending final response');
 
     // Push sent successfully
     return res.status(201).json({
         success: true,
-        pushId: id,
         data: 'Students are successfully notified on their Devices'
     });
 });
