@@ -1,4 +1,5 @@
 const sendPushNotification = require('../utils/sendPushNotification');
+const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const User = require('../models/User');
 const Role = require('../models/Role');
@@ -10,6 +11,11 @@ const ObjectId = require('mongoose').Types.ObjectId;
 exports.walletCreated = asyncHandler(async (req, res, next) => {
 
     const { userId, notificationMessage } = req.body;
+
+    //Validation
+    if (!userId || !notificationMessage) {
+        return next(new ErrorResponse('userId and notificationMessage is mandatory to pass', 400));
+    }
 
     // Get device-id of provided User from the User table
     // Use Pushy npm to send the push notification with the provided payload
@@ -55,13 +61,18 @@ exports.walletCreated = asyncHandler(async (req, res, next) => {
     });
 });
 
-
 // @desc      Notify Sender & Receiver about Instant message sent / received
 // @route     POST /api/v1/notification/consumer/seller/instant/message
 // @access    Private/Authorized User
-exports.consumerSellerInstantMessageSentReceived = asyncHandler(async (req, res, next) => {
+exports.instantMessageSentReceived = asyncHandler(async (req, res, next) => {
 
     const { senderId, receiverId, senderNotificationMessage, receiverNotificationMessage } = req.body;
+
+    //Validation
+    if (!senderId || !receiverId || senderNotificationMessage || receiverNotificationMessage) {
+        return next(new ErrorResponse(`senderId, receiverId, 
+        senderNotificationMessage and notificationMessage is mandatory to pass`, 400));
+    }
 
     // Get device-ids of provided Sender and Receiver from the User table
     // Use Pushy npm to send the push notification with the provided payload
@@ -142,6 +153,11 @@ exports.consumerSellerPaymentSent = asyncHandler(async (req, res, next) => {
 
     const { sellerId, notificationMessage } = req.body;
 
+    //Validation
+    if (!sellerId || !notificationMessage) {
+        return next(new ErrorResponse('sellerId and notificationMessage is mandatory to pass', 400));
+    }
+
     const roleData = await Role.findOne({ "name": "seller" });
 
     if (!roleData) {
@@ -202,6 +218,11 @@ exports.consumerSellerPaymentSent = asyncHandler(async (req, res, next) => {
 exports.customerRefillStockNotification = asyncHandler(async (req, res, next) => {
 
     const { notificationMessage } = req.body;
+
+    //Validation
+    if (!notificationMessage) {
+        return next(new ErrorResponse('notificationMessage is mandatory to pass', 400));
+    }
 
     // Get device-id of provided User from the User table
     // Use Pushy npm to send the push notification with the provided payload
@@ -275,7 +296,12 @@ exports.customerRefillStockNotification = asyncHandler(async (req, res, next) =>
 exports.customerPurchaseMadeNotification = asyncHandler(async (req, res, next) => {
 
     // customer id to fetch the customer name
-    const { sellerId, customerName, notificationMessage } = req.body;
+    const { sellerId, notificationMessage } = req.body;
+
+    //Validation
+    if (!sellerId || !notificationMessage) {
+        return next(new ErrorResponse('sellerId and notificationMessage is mandatory to pass', 400));
+    }
 
     // Get device-id of provided User from the User table
     // Use Pushy npm to send the push notification with the provided payload
@@ -306,7 +332,7 @@ exports.customerPurchaseMadeNotification = asyncHandler(async (req, res, next) =
             data: 'Please register the device for the provided Seller before attempting to send any notification.'
         });
     }
-    
+
     // Set push payload data to deliver to devices
     const data = {
         message: notificationMessage
@@ -331,65 +357,82 @@ exports.customerPurchaseMadeNotification = asyncHandler(async (req, res, next) =
     });
 });
 
-// Query Required from Pieter
 // @desc      Notify Patient about the Payment Receive
-// @route     POST /api/v1/notification/patient/payment-receive
+// @route     POST /api/v1/notification/patient/payment/receive
 // @access    Private/Authorized User
 exports.patientPaymentReceiveNotification = asyncHandler(async (req, res, next) => {
 
     // customer id to fetch the customer name
-    const { sellerId, customerId, notificationMessage } = req.body;
+    const { patientId, notificationMessage } = req.body;
+
+    //Validation
+    if (!patientId || !notificationMessage) {
+        return next(new ErrorResponse('patientId and notificationMessage is mandatory to pass', 400));
+    }
 
     // Get device-id of provided User from the User table
     // Use Pushy npm to send the push notification with the provided payload
 
-    // first fetch objectId of consumer role then 
-    // use find query with where in clause
-    // to find the accurate User
+    const roleData = await Role.findOne({ "name": "patient" });
 
-    const customerProfile = await Profile.find({ userId: ObjectId(customerId) });
-
-    if (!customerProfile) {
-        return res.status(400).json({
-            success: false,
-            data: 'Customer not found.'
-        });
-    }
-
-    // first fetch objectId of consumer role then 
-    // use find query with where in clause
-    // to find the accurate User
-
-    const seller = await User.find(sellerId);
-
-    if (!seller) {
-        return res.status(400).json({
-            success: false,
-            data: 'Seller not found.'
-        });
-    }
-
-    if (!seller.deviceIds.length === 0) {
+    if (!roleData) {
         return res.status(500).json({
             success: false,
-            data: 'Please register the device for the provided Seller before attempting to send any notification.'
+            data: 'Patient role does not exist'
         });
     }
+
+    const patientData = await User.findOne({
+        $and: [{ _id: ObjectId(patientId) }, { "roles": { $in: ObjectId(roleData._id) } }]
+    });
+
+    if (!patientData) {
+        return res.status(400).json({
+            success: false,
+            data: 'Patient does not exist.'
+        });
+    }
+
+    if (!sellerData.deviceIds.length === 0) {
+        return res.status(500).json({
+            success: false,
+            data: 'Please register the device for the provided Patient before attempting to send any notification.'
+        });
+    }
+
+    // Set push payload data to deliver to devices
+    const data = {
+        message: notificationMessage
+    };
+
+    // Set sample iOS notification fields
+    const options = {
+        notification: {
+            badge: 1,
+            sound: null,
+            body: null
+        },
+    };
+
+    // Send push notification
+    await sendPushNotification(data, patientData.deviceIds, options);
+
     // Push sent successfully
     return res.status(201).json({
         success: true,
-        pushId: id,
-        data: 'Seller is successfully notified on their Devices'
+        data: 'Patient is successfully notified on their Devices'
     });
 });
 
-
-// Ed 18 
 // @desc      Notify User about the Free Course on Google Class Room
 // @route     POST /api/v1/notification/free/course
 // @access    Private/Authorized User
 exports.freeCourseNotification = asyncHandler(async (req, res, next) => {
     const { notificationMessage } = req.body;
+
+    if (!notificationMessage) {
+        return next(new ErrorResponse('notificationMessage is mandatory to pass', 400));
+    }
 
     // Get device-id of provided User from the User table
     // Use Pushy npm to send the push notification with the provided payload
