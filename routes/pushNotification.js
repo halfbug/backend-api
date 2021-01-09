@@ -3,7 +3,7 @@ const {
   walletCreated,
   consumerSellerInstantMessageSentReceived,
   consumerSellerPaymentSent,
-  refillStockNotification,
+  customerRefillStockNotification,
   purchaseMadeNotification,
   freeCourseNotification
 } = require('../controllers/pushNotification');
@@ -23,7 +23,7 @@ router
   .post('/consumer/seller/payment/sent', consumerSellerPaymentSent)
 
 router
-  .post('/refill/stock', refillStockNotification)
+  .post('/customer/refill/stock', customerRefillStockNotification)
 
 router
   .post('/purchase/made', purchaseMadeNotification)

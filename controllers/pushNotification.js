@@ -147,11 +147,18 @@ exports.consumerSellerPaymentSent = asyncHandler(async (req, res, next) => {
 
     const roleData = await Role.findOne({ "name": "seller" });
 
+    if (!roleData) {
+        return res.status(500).json({
+            success: false,
+            data: 'Seller Role does not exist'
+        });
+    }
+
     // Get device-id of provided User from the User table
     // Use Pushy npm to send the push notification with the provided payload
-    
+
     const userData = await User.findOne({
-        $and: [{ "_id": ObjectId(userId) }, { "roles": { $in: ObjectId(roleData._id) } }]
+        $and: [{ "_id": ObjectId(sellerId) }, { "roles": { $in: ObjectId(roleData._id) } }]
     });
 
     if (userData === undefined || userData === null) {
@@ -193,9 +200,9 @@ exports.consumerSellerPaymentSent = asyncHandler(async (req, res, next) => {
 });
 
 // @desc      Notify Customers about the Re-fill of Stock
-// @route     POST /api/v1/notification/stock/refill
+// @route     POST /api/v1/notification/customer/stock/refill
 // @access    Private/Authorized User
-exports.refillStockNotification = asyncHandler(async (req, res, next) => {
+exports.customerRefillStockNotification = asyncHandler(async (req, res, next) => {
 
     const { notificationMessage } = req.body;
 
@@ -206,50 +213,61 @@ exports.refillStockNotification = asyncHandler(async (req, res, next) => {
     // use find query with where in clause
     // to find the accurate User
 
-    const userData = await User.find(userId);
+    const roleData = await Role.findOne({ "name": "customer" });
 
-    console.log(`User ${userData.deviceIds}`);
-
-    if (userData.length === 0) {
-        return res.status(400).json({
+    if (!roleData) {
+        return res.status(500).json({
             success: false,
-            data: 'Users are not found.'
+            data: 'Customer role does not exist'
         });
     }
 
+    const userData = await User.find({ "roles": { $in: ObjectId(roleData._id) } });
+
+    if (userData.length === 0) {
+        return res.status(500).json({
+            success: false,
+            data: 'Customers does not exist'
+        });
+    }
+
+    allDeviceIds = [];
+
     userData.forEach((item) => {
-        // No devices registered yet?
         if (item.deviceIds.length > 0) {
-            const api = new Pushy(process.env.PUSHY_SECRET_API_KEY);
-
-            // Set push payload data to deliver to devices
-            const data = {
-                message: notificationMessage
-            };
-
-            // Set sample iOS notification fields
-            const options = {
-                notification: {
-                    badge: 1,
-                    sound: null,
-                    body: null
-                },
-            };
-
-            // Send push notification
-            api.sendPushNotification(data, userData.deviceIds, options, function (err, id) {
-                // Request failed?
-                if (err) {
-                    console.log(`erro in sending push notification ${err}`);
-                }
+            item.deviceIds.forEach((deviceId) => {
+                allDeviceIds.push(deviceId);
             });
-        }
+        } else { console.log(`Device Id not exist for this user ${item.email}`); }
     });
+
+    console.log(`allDeviceIds.length ${allDeviceIds.length}`);
+
+    if (allDeviceIds.length > 0) {
+
+        // Set push payload data to deliver to devices
+        const data = {
+            message: notificationMessage
+        };
+
+        // Set sample iOS notification fields
+        const options = {
+            notification: {
+                badge: 1,
+                sound: null,
+                body: null
+            },
+        };
+
+        // Send push notification
+        await sendPushNotification(data, allDeviceIds, options);
+    }
+
+    console.log('sending final response');
 
     // Push sent successfully
     return res.status(201).json({
         success: true,
-        pushId: id,
         data: 'Customers are successfully notified on their Devices'
     });
 });
@@ -500,16 +518,12 @@ exports.freeCourseNotification = asyncHandler(async (req, res, next) => {
 
     const roleData = await Role.findOne({ "name": "student" });
 
-    console.log(`role data ${roleData}`);
-
-    if (roleData == null || roleData == undefined) {
-        // Push sent successfully
+    if (!roleData) {
         return res.status(500).json({
             success: false,
             data: 'Student role is not defined'
         });
     }
-
     const userData = await User.find({ "roles": { $in: ObjectId(roleData._id) } });
 
     if (userData.length === 0) {
