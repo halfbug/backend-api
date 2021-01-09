@@ -1,11 +1,8 @@
-const ErrorResponse = require('../utils/errorResponse');
 const sendPushNotification = require('../utils/sendPushNotification');
 const asyncHandler = require('../middleware/async');
 const User = require('../models/User');
 const Role = require('../models/Role');
 const ObjectId = require('mongoose').Types.ObjectId;
-
-const Pushy = require('pushy');
 
 // @desc      Notify User About Wallet Created
 // @route     POST /api/v1/notification/wallet/created
@@ -64,7 +61,7 @@ exports.walletCreated = asyncHandler(async (req, res, next) => {
 // @access    Private/Authorized User
 exports.consumerSellerInstantMessageSentReceived = asyncHandler(async (req, res, next) => {
 
-    const { senderId, receiverId, senderMessage, receiverMessage } = req.body;
+    const { senderId, receiverId, senderNotificationMessage, receiverNotificationMessage } = req.body;
 
     // Get device-ids of provided Sender and Receiver from the User table
     // Use Pushy npm to send the push notification with the provided payload
@@ -108,7 +105,7 @@ exports.consumerSellerInstantMessageSentReceived = asyncHandler(async (req, res,
     if (allSenderIds.length > 0) {
         // Send push notification to Senders
         await sendPushNotification({
-            message: senderMessage
+            message: senderNotificationMessage
         }, allSenderIds, {
             notification: {
                 badge: 1,
@@ -121,7 +118,7 @@ exports.consumerSellerInstantMessageSentReceived = asyncHandler(async (req, res,
     if (allReceiverIds.length > 0) {
         // Send push notification to Receivers
         await sendPushNotification({
-            message: receiverMessage
+            message: receiverNotificationMessage
         }, allReceiverIds, {
             notification: {
                 badge: 1,
@@ -272,53 +269,44 @@ exports.customerRefillStockNotification = asyncHandler(async (req, res, next) =>
     });
 });
 
-
 // @desc      Notify Seller about purchase made by the Customer
-// @route     POST /api/v1/notification/purchase/made
+// @route     POST /api/v1/notification/customer/purchase/made
 // @access    Private/Authorized User
-exports.purchaseMadeNotification = asyncHandler(async (req, res, next) => {
+exports.customerPurchaseMadeNotification = asyncHandler(async (req, res, next) => {
 
     // customer id to fetch the customer name
-    const { sellerId, customerId, notificationMessage } = req.body;
+    const { sellerId, customerName, notificationMessage } = req.body;
 
     // Get device-id of provided User from the User table
     // Use Pushy npm to send the push notification with the provided payload
 
-    // first fetch objectId of consumer role then 
-    // use find query with where in clause
-    // to find the accurate User
+    const roleData = await Role.findOne({ "name": "seller" });
 
-    const customerProfile = await Profile.find({ userId: ObjectId(customerId) });
-
-    if (!customerProfile) {
-        return res.status(400).json({
+    if (!roleData) {
+        return res.status(500).json({
             success: false,
-            data: 'Customer not found.'
+            data: 'Seller role does not exist'
         });
     }
 
-    // first fetch objectId of consumer role then 
-    // use find query with where in clause
-    // to find the accurate User
+    const sellerData = await User.findOne({
+        $and: [{ _id: ObjectId(sellerId) }, { "roles": { $in: ObjectId(roleData._id) } }]
+    });
 
-    const seller = await User.find(sellerId);
-
-    if (!seller) {
+    if (!sellerData) {
         return res.status(400).json({
             success: false,
-            data: 'Seller not found.'
+            data: 'Seller does not exist.'
         });
     }
 
-    if (!seller.deviceIds.length === 0) {
+    if (!sellerData.deviceIds.length === 0) {
         return res.status(500).json({
             success: false,
             data: 'Please register the device for the provided Seller before attempting to send any notification.'
         });
     }
-
-    const api = new Pushy(process.env.PUSHY_SECRET_API_KEY);
-
+    
     // Set push payload data to deliver to devices
     const data = {
         message: notificationMessage
@@ -334,98 +322,16 @@ exports.purchaseMadeNotification = asyncHandler(async (req, res, next) => {
     };
 
     // Send push notification
-    api.sendPushNotification(data, userData.deviceIds, options, function (err, id) {
-        // Request failed?
-        if (err) {
-            console.log(`erro in sending push notification ${err}`);
-        }
-    });
+    await sendPushNotification(data, sellerData.deviceIds, options);
 
     // Push sent successfully
     return res.status(201).json({
         success: true,
-        pushId: id,
         data: 'Seller is successfully notified on their Devices'
     });
 });
 
-// // @desc      Notify Seller about purchase made by the Customer
-// // @route     POST /api/v1/notification/purchase/made
-// // @access    Private/Authorized User
-// exports.purchaseMadeNotification = asyncHandler(async (req, res, next) => {
-
-//     // customer id to fetch the customer name
-//     const { sellerId, customerId, notificationMessage } = req.body;
-
-//     // Get device-id of provided User from the User table
-//     // Use Pushy npm to send the push notification with the provided payload
-
-//     // first fetch objectId of consumer role then 
-//     // use find query with where in clause
-//     // to find the accurate User
-
-//     const customerProfile = await Profile.find({ userId: ObjectId(customerId) });
-
-//     if (!customerProfile) {
-//         return res.status(400).json({
-//             success: false,
-//             data: 'Customer not found.'
-//         });
-//     }
-
-//     // first fetch objectId of consumer role then 
-//     // use find query with where in clause
-//     // to find the accurate User
-
-//     const seller = await User.find(sellerId);
-
-//     if (!seller) {
-//         return res.status(400).json({
-//             success: false,
-//             data: 'Seller not found.'
-//         });
-//     }
-
-//     if (!seller.deviceIds.length === 0) {
-//         return res.status(500).json({
-//             success: false,
-//             data: 'Please register the device for the provided Seller before attempting to send any notification.'
-//         });
-//     }
-
-//     const api = new Pushy(process.env.PUSHY_SECRET_API_KEY);
-
-//     // Set push payload data to deliver to devices
-//     const data = {
-//         message: notificationMessage
-//     };
-
-//     // Set sample iOS notification fields
-//     const options = {
-//         notification: {
-//             badge: 1,
-//             sound: null,
-//             body: null
-//         },
-//     };
-
-//     // Send push notification
-//     api.sendPushNotification(data, userData.deviceIds, options, function (err, id) {
-//         // Request failed?
-//         if (err) {
-//             console.log(`erro in sending push notification ${err}`);
-//         }
-//     });
-
-//     // Push sent successfully
-//     return res.status(201).json({
-//         success: true,
-//         pushId: id,
-//         data: 'Seller is successfully notified on their Devices'
-//     });
-// });
-
-
+// Query Required from Pieter
 // @desc      Notify Patient about the Payment Receive
 // @route     POST /api/v1/notification/patient/payment-receive
 // @access    Private/Authorized User
@@ -469,31 +375,6 @@ exports.patientPaymentReceiveNotification = asyncHandler(async (req, res, next) 
             data: 'Please register the device for the provided Seller before attempting to send any notification.'
         });
     }
-
-    const api = new Pushy(process.env.PUSHY_SECRET_API_KEY);
-
-    // Set push payload data to deliver to devices
-    const data = {
-        message: notificationMessage
-    };
-
-    // Set sample iOS notification fields
-    const options = {
-        notification: {
-            badge: 1,
-            sound: null,
-            body: null
-        },
-    };
-
-    // Send push notification
-    api.sendPushNotification(data, userData.deviceIds, options, function (err, id) {
-        // Request failed?
-        if (err) {
-            console.log(`erro in sending push notification ${err}`);
-        }
-    });
-
     // Push sent successfully
     return res.status(201).json({
         success: true,

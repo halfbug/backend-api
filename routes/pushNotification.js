@@ -4,7 +4,7 @@ const {
   consumerSellerInstantMessageSentReceived,
   consumerSellerPaymentSent,
   customerRefillStockNotification,
-  purchaseMadeNotification,
+  customerPurchaseMadeNotification,
   freeCourseNotification
 } = require('../controllers/pushNotification');
 const { protect } = require('../middleware/auth');
@@ -26,7 +26,7 @@ router
   .post('/customer/refill/stock', customerRefillStockNotification)
 
 router
-  .post('/purchase/made', purchaseMadeNotification)
+  .post('/customer/purchase/made', customerPurchaseMadeNotification)
 
 router
   .post('/free/course', freeCourseNotification)
