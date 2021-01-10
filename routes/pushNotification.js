@@ -1,8 +1,14 @@
 const express = require('express');
 const {
   walletCreated,
-  instantMessageSentReceived,
-  paymentSent
+  customerSellerInstantMessageSentReceived,
+  teacherStudentInstantMessageSentReceived,
+  customerSellerPaymentSent,
+  customerRefillStockNotification,
+  customerPurchaseMadeNotification,
+  patientPaymentReceiveNotification,
+  doctorPatientInstantMessageSentReceived,
+  freeCourseNotification  
 } = require('../controllers/pushNotification');
 const { protect } = require('../middleware/auth');
 
@@ -14,9 +20,27 @@ router
   .post('/wallet/created', walletCreated)
 
 router
-  .post('/instant/message', instantMessageSentReceived)
+  .post('/customer/seller/instant/message', customerSellerInstantMessageSentReceived)
 
 router
-  .post('/payment/sent', paymentSent)
+  .post('/customer/seller/payment/sent', customerSellerPaymentSent)
+
+router
+  .post('/customer/refill/stock', customerRefillStockNotification)
+
+router
+  .post('/customer/purchase/made', customerPurchaseMadeNotification)
+
+router
+  .post('/patient/payment/receive', patientPaymentReceiveNotification)
+
+  router
+  .post('/doctor/patient/instant/message', doctorPatientInstantMessageSentReceived)
+
+  router
+  .post('/teacher/student/instant/message', teacherStudentInstantMessageSentReceived)
+
+router
+  .post('/student/free/course', freeCourseNotification)
 
 module.exports = router;
