@@ -3,6 +3,7 @@ const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const User = require('../models/User');
 const Role = require('../models/Role');
+const App = require('../models/App');
 const ObjectId = require('mongoose').Types.ObjectId;
 const Pushy = require('pushy');
 
@@ -11,10 +12,10 @@ const Pushy = require('pushy');
 // @access    Private/Authorized User may be administrator
 exports.walletCreated = asyncHandler(async (req, res, next) => {
 
-    const { userId, notificationMessage, app } = req.body;
+    const { userId, notificationMessage } = req.body;
 
     //Validation
-    if (!userId || !notificationMessage || !app) {
+    if (!userId || !notificationMessage) {
         return next(new ErrorResponse('userId, notificationMessage and app are mandatory to pass', 400));
     }
 
@@ -23,18 +24,42 @@ exports.walletCreated = asyncHandler(async (req, res, next) => {
 
     const userData = await User.findById(userId);
 
-    if (userData === undefined || userData === null) {
-        return res.status(400).json({
-            success: false,
-            data: 'User not found.'
-        });
-    }
-
     // No devices registered yet?
     if (userData.deviceIds.length === 0) {
         return res.status(500).json({
             success: false,
             data: 'Please register the device for the provided User before attempting to send any notification.'
+        });
+    }
+
+    if (userData === undefined || userData === null) {
+        return res.status(500).json({
+            success: false,
+            data: 'User not found.'
+        });
+    }
+
+    const rolesData = await Role.find({ "_id": { $in: userData.roles } });
+
+    if (rolesData.length === 0) {
+        return res.status(500).json({
+            success: false,
+            data: 'Role not found'
+        });
+    }
+
+    const appIds = [];
+
+    rolesData.forEach((item) => {
+        appIds.push(ObjectId(item.appId));
+    });
+
+    const appsData = await App.find({ "_id": { $in: appIds } });
+
+    if (appsData.length === 0) {
+        return res.status(500).json({
+            success: false,
+            data: 'Apps not found'
         });
     }
 
@@ -52,10 +77,35 @@ exports.walletCreated = asyncHandler(async (req, res, next) => {
         },
     };
 
-    const api = new Pushy(process.env.PUSHY_SECRET_API_KEY_BIG_MUDI);
-    
-    // Send push notification
-    await sendPushNotification(data, userData.deviceIds, options, api);
+    let api = null;
+
+    appsData.forEach((app) => {
+
+        console.log(`app is ${app.name}`);
+
+        if (app.name == 'bigmudi') {
+            api = new Pushy(process.env.PUSHY_SECRET_API_KEY_BIG_MUDI);
+        }
+
+        if (app.name == 'blockm') {
+            api = new Pushy(process.env.PUSHY_SECRET_API_KEY_BLOCK_M);
+        }
+
+        if (app.name == 'blocked') {
+            api = new Pushy(process.env.PUSHY_SECRET_API_KEY_BLOCK_ED);
+        }
+
+        if (app.name == 'blockmed') {
+            api = new Pushy(process.env.PUSHY_SECRET_API_KEY_BLOCK_MED);
+        }
+
+        if (app.name == 'blockride') {
+            api = new Pushy(process.env.PUSHY_SECRET_API_KEY_BLOCK_RIDE);
+        }
+
+        // Send push notification
+        sendPushNotification(data, userData.deviceIds, options, api);       
+    });
 
     return res.status(201).json({
         success: true,
@@ -84,7 +134,7 @@ exports.customerSellerInstantMessageSentReceived = asyncHandler(async (req, res,
     console.log(`User Data ${JSON.stringify(userData)}`);
 
     if (userData.length === 0) {
-        return res.status(400).json({
+        return res.status(500).json({
             success: false,
             data: 'Users does not exist'
         });
@@ -179,7 +229,7 @@ exports.customerSellerPaymentSent = asyncHandler(async (req, res, next) => {
     });
 
     if (userData === undefined || userData === null) {
-        return res.status(400).json({
+        return res.status(500).json({
             success: false,
             data: 'User not found or User is not a seller.'
         });
@@ -328,7 +378,7 @@ exports.customerPurchaseMadeNotification = asyncHandler(async (req, res, next) =
     });
 
     if (!sellerData) {
-        return res.status(400).json({
+        return res.status(500).json({
             success: false,
             data: 'Seller does not exist.'
         });
@@ -371,7 +421,6 @@ exports.customerPurchaseMadeNotification = asyncHandler(async (req, res, next) =
 // @route     POST /api/v1/notification/patient/payment/receive
 // @access    Private/Authorized User
 exports.patientPaymentReceiveNotification = asyncHandler(async (req, res, next) => {
-
     // customer id to fetch the customer name
     const { patientId, notificationMessage } = req.body;
 
@@ -397,7 +446,7 @@ exports.patientPaymentReceiveNotification = asyncHandler(async (req, res, next) 
     });
 
     if (!patientData) {
-        return res.status(400).json({
+        return res.status(500).json({
             success: false,
             data: 'Patient does not exist.'
         });
@@ -463,7 +512,7 @@ exports.freeCourseNotification = asyncHandler(async (req, res, next) => {
     const userData = await User.find({ "roles": { $in: ObjectId(roleData._id) } });
 
     if (userData.length === 0) {
-        return res.status(400).json({
+        return res.status(500).json({
             success: false,
             data: 'Users are not found.'
         });
@@ -536,7 +585,7 @@ exports.teacherStudentInstantMessageSentReceived = asyncHandler(async (req, res,
     const userData = await User.find({ $or: [{ '_id': ObjectId(senderId) }, { '_id': ObjectId(receiverId) }] });
 
     if (userData.length === 0) {
-        return res.status(400).json({
+        return res.status(500).json({
             success: false,
             data: 'Users does not exist'
         });
