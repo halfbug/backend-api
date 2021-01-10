@@ -70,9 +70,8 @@ exports.customerSellerInstantMessageSentReceived = asyncHandler(async (req, res,
     const { senderId, receiverId, senderNotificationMessage, receiverNotificationMessage } = req.body;
 
     //Validation
-    if (!senderId || !receiverId || senderNotificationMessage || receiverNotificationMessage) {
-        return next(new ErrorResponse(`senderId, receiverId, 
-        senderNotificationMessage and notificationMessage is mandatory to pass`, 400));
+    if (!senderId || !receiverId || !senderNotificationMessage || !receiverNotificationMessage) {
+        return next(new ErrorResponse(`senderId, receiverId, senderNotificationMessage and notificationMessage are mandatory to pass`, 400));
     }
 
     // Get device-ids of provided Sender and Receiver from the User table
@@ -158,7 +157,7 @@ exports.customerSellerPaymentSent = asyncHandler(async (req, res, next) => {
 
     //Validation
     if (!sellerId || !notificationMessage) {
-        return next(new ErrorResponse('sellerId and notificationMessage is mandatory to pass', 400));
+        return next(new ErrorResponse('sellerId and notificationMessage are mandatory to pass', 400));
     }
 
     const roleData = await Role.findOne({ "name": "seller" });
@@ -307,7 +306,7 @@ exports.customerPurchaseMadeNotification = asyncHandler(async (req, res, next) =
 
     //Validation
     if (!sellerId || !notificationMessage) {
-        return next(new ErrorResponse('sellerId and notificationMessage is mandatory to pass', 400));
+        return next(new ErrorResponse('sellerId and notificationMessage are mandatory to pass', 400));
     }
 
     // Get device-id of provided User from the User table
@@ -376,7 +375,7 @@ exports.patientPaymentReceiveNotification = asyncHandler(async (req, res, next) 
 
     //Validation
     if (!patientId || !notificationMessage) {
-        return next(new ErrorResponse('patientId and notificationMessage is mandatory to pass', 400));
+        return next(new ErrorResponse('patientId and notificationMessage are  mandatory to pass', 400));
     }
 
     // Get device-id of provided User from the User table
@@ -525,9 +524,9 @@ exports.teacherStudentInstantMessageSentReceived = asyncHandler(async (req, res,
     const { senderId, receiverId, senderNotificationMessage, receiverNotificationMessage } = req.body;
 
     //Validation
-    if (!senderId || !receiverId || senderNotificationMessage || receiverNotificationMessage) {
+    if (!senderId || !receiverId || !senderNotificationMessage || !receiverNotificationMessage) {
         return next(new ErrorResponse(`senderId, receiverId, 
-        senderNotificationMessage and notificationMessage is mandatory to pass`, 400));
+        senderNotificationMessage and notificationMessage are mandatory to pass`, 400));
     }
 
     // Get device-ids of provided Sender and Receiver from the User table

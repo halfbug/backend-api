@@ -37,6 +37,6 @@ router
   .post('/teacher/student/instant/message', teacherStudentInstantMessageSentReceived)
 
 router
-  .post('/free/course', freeCourseNotification)
+  .post('/student/free/course', freeCourseNotification)
 
 module.exports = router;
