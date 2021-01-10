@@ -7,6 +7,7 @@ const {
   customerRefillStockNotification,
   customerPurchaseMadeNotification,
   patientPaymentReceiveNotification,
+  doctorPatientInstantMessageSentReceived,
   freeCourseNotification  
 } = require('../controllers/pushNotification');
 const { protect } = require('../middleware/auth');
@@ -32,6 +33,9 @@ router
 
 router
   .post('/patient/payment/receive', patientPaymentReceiveNotification)
+
+  router
+  .post('/doctor/patient/instant/message', doctorPatientInstantMessageSentReceived)
 
   router
   .post('/teacher/student/instant/message', teacherStudentInstantMessageSentReceived)

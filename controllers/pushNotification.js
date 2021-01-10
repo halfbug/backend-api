@@ -11,11 +11,11 @@ const Pushy = require('pushy');
 // @access    Private/Authorized User may be administrator
 exports.walletCreated = asyncHandler(async (req, res, next) => {
 
-    const { userId, notificationMessage } = req.body;
+    const { userId, notificationMessage, app } = req.body;
 
     //Validation
-    if (!userId || !notificationMessage) {
-        return next(new ErrorResponse('userId and notificationMessage is mandatory to pass', 400));
+    if (!userId || !notificationMessage || !app) {
+        return next(new ErrorResponse('userId, notificationMessage and app are mandatory to pass', 400));
     }
 
     // Get device-id of provided User from the User table
@@ -52,8 +52,10 @@ exports.walletCreated = asyncHandler(async (req, res, next) => {
         },
     };
 
+    const api = new Pushy(process.env.PUSHY_SECRET_API_KEY_BIG_MUDI);
+    
     // Send push notification
-    await sendPushNotification(data, userData.deviceIds, options);
+    await sendPushNotification(data, userData.deviceIds, options, api);
 
     return res.status(201).json({
         success: true,
@@ -115,7 +117,7 @@ exports.customerSellerInstantMessageSentReceived = asyncHandler(async (req, res,
 
     const api = new Pushy(process.env.PUSHY_SECRET_API_KEY_BIG_MUDI);
 
-    if (allSenderIds.length > 0) {        
+    if (allSenderIds.length > 0) {
         // Send push notification to Senders
         await sendPushNotification({
             message: senderNotificationMessage
@@ -525,8 +527,7 @@ exports.teacherStudentInstantMessageSentReceived = asyncHandler(async (req, res,
 
     //Validation
     if (!senderId || !receiverId || !senderNotificationMessage || !receiverNotificationMessage) {
-        return next(new ErrorResponse(`senderId, receiverId, 
-        senderNotificationMessage and notificationMessage are mandatory to pass`, 400));
+        return next(new ErrorResponse(`senderId, receiverId, senderNotificationMessage and notificationMessage are mandatory to pass`, 400));
     }
 
     // Get device-ids of provided Sender and Receiver from the User table
@@ -567,6 +568,90 @@ exports.teacherStudentInstantMessageSentReceived = asyncHandler(async (req, res,
     });
 
     const api = new Pushy(process.env.PUSHY_SECRET_API_KEY_BLOCK_ED);
+
+    if (allSenderIds.length > 0) {
+        // Send push notification to Senders
+        await sendPushNotification({
+            message: senderNotificationMessage
+        }, allSenderIds, {
+            notification: {
+                badge: 1,
+                sound: null,
+                body: null
+            },
+        }, api);
+    }
+
+    if (allReceiverIds.length > 0) {
+        // Send push notification to Receivers
+        await sendPushNotification({
+            message: receiverNotificationMessage
+        }, allReceiverIds, {
+            notification: {
+                badge: 1,
+                sound: null,
+                body: null
+            },
+        }, api);
+    }
+
+    // Push sent successfully
+    return res.status(201).json({
+        success: true,
+        data: 'Sender and Receivers are successfully notified on their Devices'
+    });
+});
+
+// @desc      Notify Sender & Receiver about Instant message sent / received
+// @route     POST /api/v1/notification/doctor/patient/instant/message
+// @access    Private/Authorized User
+exports.doctorPatientInstantMessageSentReceived = asyncHandler(async (req, res, next) => {
+
+    const { senderId, receiverId, senderNotificationMessage, receiverNotificationMessage } = req.body;
+
+    //Validation
+    if (!senderId || !receiverId || !senderNotificationMessage || !receiverNotificationMessage) {
+        return next(new ErrorResponse(`senderId, receiverId, senderNotificationMessage and notificationMessage are mandatory to pass`, 400));
+    }
+
+    // Get device-ids of provided Sender and Receiver from the User table
+    // Use Pushy npm to send the push notification with the provided payload
+
+    const userData = await User.find({ $or: [{ '_id': ObjectId(senderId) }, { '_id': ObjectId(receiverId) }] });
+
+    if (userData.length === 0) {
+        return res.status(400).json({
+            success: false,
+            data: 'Users does not exist'
+        });
+    }
+
+    const allSenderIds = [];
+    const allReceiverIds = [];
+
+    userData.map((record) => {
+        // sender Part
+        if (record._id == senderId) {
+            console.log(`Sender Part`);
+            if (record.deviceIds.length > 0) {
+                record.deviceIds.forEach((id) => {
+                    allSenderIds.push(id);
+                });
+            }
+        }
+
+        // receiver Part
+        if (record._id == receiverId) {
+            console.log(`Receiver Part`);
+            if (record.deviceIds.length > 0) {
+                record.deviceIds.forEach((id) => {
+                    allReceiverIds.push(id);
+                });
+            }
+        }
+    });
+
+    const api = new Pushy(process.env.PUSHY_SECRET_API_KEY_BLOCK_MED);
 
     if (allSenderIds.length > 0) {
         // Send push notification to Senders
