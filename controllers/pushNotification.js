@@ -4,6 +4,7 @@ const asyncHandler = require('../middleware/async');
 const User = require('../models/User');
 const Role = require('../models/Role');
 const ObjectId = require('mongoose').Types.ObjectId;
+const Pushy = require('pushy');
 
 // @desc      Notify User About Wallet Created
 // @route     POST /api/v1/notification/wallet/created
@@ -62,9 +63,9 @@ exports.walletCreated = asyncHandler(async (req, res, next) => {
 });
 
 // @desc      Notify Sender & Receiver about Instant message sent / received
-// @route     POST /api/v1/notification/consumer/seller/instant/message
+// @route     POST /api/v1/notification/customer/seller/instant/message
 // @access    Private/Authorized User
-exports.instantMessageSentReceived = asyncHandler(async (req, res, next) => {
+exports.customerSellerInstantMessageSentReceived = asyncHandler(async (req, res, next) => {
 
     const { senderId, receiverId, senderNotificationMessage, receiverNotificationMessage } = req.body;
 
@@ -113,7 +114,9 @@ exports.instantMessageSentReceived = asyncHandler(async (req, res, next) => {
         }
     });
 
-    if (allSenderIds.length > 0) {
+    const api = new Pushy(process.env.PUSHY_SECRET_API_KEY_BIG_MUDI);
+
+    if (allSenderIds.length > 0) {        
         // Send push notification to Senders
         await sendPushNotification({
             message: senderNotificationMessage
@@ -123,7 +126,7 @@ exports.instantMessageSentReceived = asyncHandler(async (req, res, next) => {
                 sound: null,
                 body: null
             },
-        });
+        }, api);
     }
 
     if (allReceiverIds.length > 0) {
@@ -136,7 +139,7 @@ exports.instantMessageSentReceived = asyncHandler(async (req, res, next) => {
                 sound: null,
                 body: null
             },
-        });
+        }, api);
     }
 
     // Push sent successfully
@@ -147,9 +150,9 @@ exports.instantMessageSentReceived = asyncHandler(async (req, res, next) => {
 });
 
 // @desc      Notify Receiver About Consumer sents the payment
-// @route     POST /api/v1/notification/consumer/seller/payment/sent
+// @route     POST /api/v1/notification/customer/seller/payment/sent
 // @access    Private/Authorized User
-exports.consumerSellerPaymentSent = asyncHandler(async (req, res, next) => {
+exports.customerSellerPaymentSent = asyncHandler(async (req, res, next) => {
 
     const { sellerId, notificationMessage } = req.body;
 
@@ -203,8 +206,10 @@ exports.consumerSellerPaymentSent = asyncHandler(async (req, res, next) => {
         },
     };
 
+    const api = new Pushy(process.env.PUSHY_SECRET_API_KEY_BIG_MUDI);
+
     // Send push notification
-    await sendPushNotification(data, userData.deviceIds, options);
+    await sendPushNotification(data, userData.deviceIds, options, api);
 
     return res.status(201).json({
         success: true,
@@ -277,8 +282,10 @@ exports.customerRefillStockNotification = asyncHandler(async (req, res, next) =>
             },
         };
 
+        const api = new Pushy(process.env.PUSHY_SECRET_API_KEY_BIG_MUDI);
+
         // Send push notification
-        await sendPushNotification(data, allDeviceIds, options);
+        await sendPushNotification(data, allDeviceIds, options, api);
     }
 
     console.log('sending final response');
@@ -347,8 +354,10 @@ exports.customerPurchaseMadeNotification = asyncHandler(async (req, res, next) =
         },
     };
 
+    const api = new Pushy(process.env.PUSHY_SECRET_API_KEY_BIG_MUDI);
+
     // Send push notification
-    await sendPushNotification(data, sellerData.deviceIds, options);
+    await sendPushNotification(data, sellerData.deviceIds, options, api);
 
     // Push sent successfully
     return res.status(201).json({
@@ -414,8 +423,10 @@ exports.patientPaymentReceiveNotification = asyncHandler(async (req, res, next) 
         },
     };
 
+    const api = new Pushy(process.env.PUSHY_SECRET_API_KEY_BLOCK_MED);
+
     // Send push notification
-    await sendPushNotification(data, patientData.deviceIds, options);
+    await sendPushNotification(data, patientData.deviceIds, options, api);
 
     // Push sent successfully
     return res.status(201).json({
@@ -457,8 +468,6 @@ exports.freeCourseNotification = asyncHandler(async (req, res, next) => {
         });
     }
 
-    console.log(`User Data ${JSON.stringify(userData)}`);
-
     const allDeviceIds = [];
 
     userData.forEach((item) => {
@@ -495,7 +504,8 @@ exports.freeCourseNotification = asyncHandler(async (req, res, next) => {
 
     if (allDeviceIds.length > 0) {
         // Send push notification
-        await sendPushNotification(data, allDeviceIds, options);
+        const api = new Pushy(process.env.PUSHY_SECRET_API_KEY_BLOCK_ED);
+        await sendPushNotification(data, allDeviceIds, options, api);
     }
 
     console.log('sending final response');
@@ -504,5 +514,90 @@ exports.freeCourseNotification = asyncHandler(async (req, res, next) => {
     return res.status(201).json({
         success: true,
         data: 'Students are successfully notified on their Devices'
+    });
+});
+
+// @desc      Notify Sender & Receiver about Instant message sent / received
+// @route     POST /api/v1/notification/teacher/student/instant/message
+// @access    Private/Authorized User
+exports.teacherStudentInstantMessageSentReceived = asyncHandler(async (req, res, next) => {
+
+    const { senderId, receiverId, senderNotificationMessage, receiverNotificationMessage } = req.body;
+
+    //Validation
+    if (!senderId || !receiverId || senderNotificationMessage || receiverNotificationMessage) {
+        return next(new ErrorResponse(`senderId, receiverId, 
+        senderNotificationMessage and notificationMessage is mandatory to pass`, 400));
+    }
+
+    // Get device-ids of provided Sender and Receiver from the User table
+    // Use Pushy npm to send the push notification with the provided payload
+
+    const userData = await User.find({ $or: [{ '_id': ObjectId(senderId) }, { '_id': ObjectId(receiverId) }] });
+
+    if (userData.length === 0) {
+        return res.status(400).json({
+            success: false,
+            data: 'Users does not exist'
+        });
+    }
+
+    const allSenderIds = [];
+    const allReceiverIds = [];
+
+    userData.map((record) => {
+        // sender Part
+        if (record._id == senderId) {
+            console.log(`Sender Part`);
+            if (record.deviceIds.length > 0) {
+                record.deviceIds.forEach((id) => {
+                    allSenderIds.push(id);
+                });
+            }
+        }
+
+        // receiver Part
+        if (record._id == receiverId) {
+            console.log(`Receiver Part`);
+            if (record.deviceIds.length > 0) {
+                record.deviceIds.forEach((id) => {
+                    allReceiverIds.push(id);
+                });
+            }
+        }
+    });
+
+    const api = new Pushy(process.env.PUSHY_SECRET_API_KEY_BLOCK_ED);
+
+    if (allSenderIds.length > 0) {
+        // Send push notification to Senders
+        await sendPushNotification({
+            message: senderNotificationMessage
+        }, allSenderIds, {
+            notification: {
+                badge: 1,
+                sound: null,
+                body: null
+            },
+        }, api);
+    }
+
+    if (allReceiverIds.length > 0) {
+        // Send push notification to Receivers
+        await sendPushNotification({
+            message: receiverNotificationMessage
+        }, allReceiverIds, {
+            notification: {
+                badge: 1,
+                sound: null,
+                body: null
+            },
+        }, api);
+    }
+
+    // Push sent successfully
+    return res.status(201).json({
+        success: true,
+        data: 'Sender and Receivers are successfully notified on their Devices'
     });
 });

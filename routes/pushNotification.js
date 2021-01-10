@@ -1,8 +1,9 @@
 const express = require('express');
 const {
   walletCreated,
-  instantMessageSentReceived,
-  consumerSellerPaymentSent,
+  customerSellerInstantMessageSentReceived,
+  teacherStudentInstantMessageSentReceived,
+  customerSellerPaymentSent,
   customerRefillStockNotification,
   customerPurchaseMadeNotification,
   patientPaymentReceiveNotification,
@@ -18,10 +19,10 @@ router
   .post('/wallet/created', walletCreated)
 
 router
-  .post('/consumer/seller/instant/message', instantMessageSentReceived)
+  .post('/customer/seller/instant/message', customerSellerInstantMessageSentReceived)
 
 router
-  .post('/consumer/seller/payment/sent', consumerSellerPaymentSent)
+  .post('/customer/seller/payment/sent', customerSellerPaymentSent)
 
 router
   .post('/customer/refill/stock', customerRefillStockNotification)
@@ -31,6 +32,9 @@ router
 
 router
   .post('/patient/payment/receive', patientPaymentReceiveNotification)
+
+  router
+  .post('/teacher/student/instant/message', teacherStudentInstantMessageSentReceived)
 
 router
   .post('/free/course', freeCourseNotification)

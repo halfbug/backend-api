@@ -1,8 +1,5 @@
-const Pushy = require('pushy');
 
-const api = new Pushy(process.env.PUSHY_SECRET_API_KEY);
-
-const sendPushNotification = (data, ids, options) => {
+const sendPushNotification = (data, ids, options, api) => {
     api.sendPushNotification(data, ids, options, function (err, id) {
         // Request failed or Success?
         if (err) {
