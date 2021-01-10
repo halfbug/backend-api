@@ -393,7 +393,7 @@ exports.patientPaymentReceiveNotification = asyncHandler(async (req, res, next) 
         });
     }
 
-    if (!sellerData.deviceIds.length === 0) {
+    if (!patientData.deviceIds.length === 0) {
         return res.status(500).json({
             success: false,
             data: 'Please register the device for the provided Patient before attempting to send any notification.'
