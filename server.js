@@ -37,6 +37,7 @@ const category = require('./routes/category');
 const attachment = require('./routes/attachment');
 const wallet = require('./routes/wallet');
 const pushNotification = require('./routes/pushNotification');
+const agoraVideoSession = require('./routes/agoraVideoSession');
 
 const app = express();
 
@@ -100,6 +101,8 @@ app.use('/api/v1/kyc', users);
 app.use('/api/v1/user/wallet', wallet);
 
 app.use('/api/v1/notification', pushNotification);
+
+app.use('/api/v1/agora', agoraVideoSession);
 
 app.use(errorHandler);
 
