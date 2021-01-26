@@ -2,7 +2,7 @@ const randomstring = require("randomstring");
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const { agoraCustomTokenGenerator } = require('../utils/agoraVideoSession/customTokenGenerator');
-const AgoraVideoSession = require('../models/agoraVideoSession');
+const AgoraVideoSession = require('../models/AgoraVideoSession');
 
 // @desc      Get agora channel & token
 // @route     GET /api/v1/agora/channel/token
