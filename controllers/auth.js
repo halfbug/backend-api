@@ -2,74 +2,57 @@ const crypto = require('crypto');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const sendEmail = require('../utils/sendEmail');
-const sendSMS =  require('../utils/sendSMS');
+const sendSMS = require('../utils/sendSMS');
 const User = require('../models/User');
 const Profile = require('../models/Profile');
-const {hashIt} = require('../utils/helper')
+const { hashIt } = require('../utils/helper')
 // @desc      Register user
 // @route     POST /api/v1/auth/register
 // @access    Public
 exports.register = asyncHandler(async (req, res, next) => {
-  const { email, password, phone, roleId, appsChannelKey, socialAcc  } = req.body;
+  const { email, password, phone, roleId, appsChannelKey, socialAcc } = req.body;
 
   // Validate emil & password
-  if (!roleId || !appsChannelKey ) {
+  if (!roleId || !appsChannelKey) {
     return next(new ErrorResponse('Role Id and appsChannelKey is mandatory  ', 400));
   }
   // Create user
   const user = await User.create(
-   req.body
-    
+    req.body
+
   );
-console.log(roleId)
   user.roles.push(roleId);
   user.appsInUse.push(appsChannelKey);
   await user.save();
-  // socialAcc.map((acc)=>{
-  //   user.socialAcc.push()
-  // })
-  // Create user profile
+
+  req.body.profile.gender = req.body.profile.gender.toLowerCase();
   const uprofile = await Profile.create({
-    ...req.body.profile, userId : user._id
-  }
-    
-   );
-console.log(user.otp)
+    ...req.body.profile, userId: user._id
+  });
   const message = `OTP - Hopeaccelerated has been successfully generated. Your pin is : ${user.otp}`;
-
   try {
-
     await sendSMS({
       phone,
       message
     });
-  
-    if(email)
-    await sendEmail({
-      email: user.email,
-      subject: 'OTP - Hopeaccelerated',
-      message
-    });
 
-    
+    if (email)
+      await sendEmail({
+        email: user.email,
+        subject: 'OTP - Hopeaccelerated',
+        message
+      });
 
-  // const {status, email, createdAt, phone} = user
-
-  res.status(200).json({ success: true, 
+    res.status(200).json({
+      success: true,
       message: 'OTP has been sent to mobile and email',
-    data:{...user._doc, profile : uprofile} });
-    
-
+      data: { ...user._doc, profile: uprofile }
+    });
   } catch (err) {
-    console.log(JSON.stringify(err)); 
-
+    console.log(JSON.stringify(err));
     return next(new ErrorResponse('Email could not be sent', 500));
   }
-
-  
 });
-
-
 
 // @desc      vserify OTP
 // @route     POST /api/v1/auth/votp
@@ -78,12 +61,12 @@ exports.votp = asyncHandler(async (req, res, next) => {
   const { email, phone, otp } = req.body;
 
   // Validate emil & password
-  if ((!email || !phone) && !otp ) {
+  if ((!email || !phone) && !otp) {
     return next(new ErrorResponse('Please provide an email/phone and otp', 400));
   }
 
   // Check for user
-  const user = email ? await User.findOne({ email }):await User.findOne({ phone }) ;
+  const user = email ? await User.findOne({ email }) : await User.findOne({ phone });
 
   if (!user) {
     return next(new ErrorResponse('Email not found', 401));
@@ -94,13 +77,13 @@ exports.votp = asyncHandler(async (req, res, next) => {
   // Check if password matches
   // console.log(user)
   const isMatch = parseInt(user.otp) === parseInt(otp);
-// console.log(isMatch)
+  // console.log(isMatch)
   if (!isMatch) {
     return next(new ErrorResponse('OTP didnt match', 401));
   }
 
 
-  await User.findByIdAndUpdate(user.id, { status : "active", otp : 0, qrcode : hashIt(email+phone)}, {
+  await User.findByIdAndUpdate(user.id, { status: "active", otp: 0, qrcode: hashIt(email + phone) }, {
     new: true,
     runValidators: true
   });
@@ -127,46 +110,48 @@ exports.regenotp = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('Email or phone not found', 401));
   }
 
-  
+
 
   if (parseInt(user.otp) === 0 && user.status !== "pending") {
     return next(new ErrorResponse('User already verified', 401));
   }
-  
+
   // Re Generate the OPT
-  
-  let notp =await user.getRegeneratedOTP();
-    user=await user.save();
-  
+
+  let notp = await user.getRegeneratedOTP();
+  user = await user.save();
+
 
   const message = `OTP - Hopeaccelerated has been successfully generated. Your pin is : ${notp}`;
 
   try {
-    
-    if(phone)
-    await sendSMS({
-      phone,
-      message
-    });
 
-    if(!email === null)
-    await sendEmail({
-      email: user.email,
-      subject: 'OTP - Hopeaccelerated',
-      message
-    });
+    if (phone)
+      await sendSMS({
+        phone,
+        message
+      });
 
-    
+    if (!email === null)
+      await sendEmail({
+        email: user.email,
+        subject: 'OTP - Hopeaccelerated',
+        message
+      });
 
-  // const {status, email, createdAt, phone} = user
 
-  res.status(200).json({ success: true, 
+
+    // const {status, email, createdAt, phone} = user
+
+    res.status(200).json({
+      success: true,
       message: 'OTP has been sent to mobile and email',
-    data:user });
-    
+      data: user
+    });
+
 
   } catch (err) {
-    console.log(JSON.stringify(err)); 
+    console.log(JSON.stringify(err));
 
     return next(new ErrorResponse(err.message, 500));
   }
@@ -221,10 +206,10 @@ exports.logout = asyncHandler(async (req, res, next) => {
 // @access    Private
 exports.getMe = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user.id);
-  const profile = await Profile.findOne({userId: user.id})
+  const profile = await Profile.findOne({ userId: user.id })
   res.status(200).json({
     success: true,
-    data: {user, profile}
+    data: { user, profile }
   });
 });
 
@@ -353,11 +338,11 @@ exports.plogin = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('Invalid phone number', 401));
   }
 
- // Re Generate the OPT
-//  console.log(user)
- const notp =await user.getRegeneratedOTP();
-  user=await user.save();
-  
+  // Re Generate the OPT
+  //  console.log(user)
+  const notp = await user.getRegeneratedOTP();
+  user = await user.save();
+
   console.log(notp)
   const message = `OTP-Hopeaccelerated has been successfully generated. Your pin is : ${notp}`;
 
@@ -375,17 +360,18 @@ exports.plogin = asyncHandler(async (req, res, next) => {
       message
     });
 
-    
 
-  // const {status, email, createdAt, phone} = user
 
-  res.status(200).json({ success: true, 
+    // const {status, email, createdAt, phone} = user
+
+    res.status(200).json({
+      success: true,
       message: 'OTP has been sent to mobile and email',
-     });
-    
+    });
+
 
   } catch (err) {
-    console.log(JSON.stringify(err)); 
+    console.log(JSON.stringify(err));
 
     return next(new ErrorResponse('Email could not be sent', 500));
   }
