@@ -2,19 +2,19 @@ const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const User = require('../models/User');
 const Wallet = require('../models/Wallet');
-const ObjectId = require('mongoose').Types.ObjectId; 
+const ObjectId = require('mongoose').Types.ObjectId;
 
 // @desc      Get wallet details of user in array
 // @route     GET /api/v1/user/wallet
 // @access    Private/Authorized User
 exports.getUserWallet = asyncHandler(async (req, res, next) => {
     console.log(`request ${req.user._id}`)
-    const userData = await User.findOne({'_id': ObjectId(req.user._id)});
+    const userData = await User.findOne({ '_id': ObjectId(req.user._id) });
     console.log(userData);
     if (userData.isKycDocVerified) {
         const userWallet = await Wallet.findOne({ 'userId': ObjectId(userData._id) });
         console.log(`Date ${userWallet}`);
-        if(!userWallet) {
+        if (!userWallet) {
             res.status(200).json({
                 success: 'User does not have the Wallet yet',
                 data: userWallet
@@ -47,5 +47,33 @@ exports.createUserWallet = asyncHandler(async (req, res, next) => {
     res.status(201).json({
         success: true,
         data: userWallet
+    });
+});
+
+// @desc      Update user wallet balance
+// @route     POST /api/v1/user/wallet/update/balance
+// @access    Private/Authorized User
+exports.updateUserWalletBalance = asyncHandler(async (req, res, next) => {
+    const { appId, token, balance } = req.body;
+
+    if (!appId || !token || !balance) {
+        return next(new ErrorResponse('Please userId, appId and token', 400));
+    }
+
+    const result = await Wallet.updateOne({
+        userId: req.user._id, appId: ObjectId(appId), token
+    }, { $set: { balance } }, { upsert: false });
+
+    console.log(`Update Result : ${JSON.stringify(result)}`)
+
+    if (result.n === 1 && result.nModified === 1) {
+        return res.status(200).json({
+            success: true,
+            data: 'User Wallet successfully updated'
+        });
+    }
+    res.status(500).json({
+        success: false,
+        data: 'User Wallet failed to update or record not found to update'
     });
 });
