@@ -25,7 +25,10 @@ exports.register = asyncHandler(async (req, res, next) => {
   user.appsInUse.push(appsChannelKey);
   await user.save();
 
-  req.body.profile.gender = req.body.profile.gender.toLowerCase();
+  if (req.body.profile.gender != undefined) {
+    req.body.profile.gender = req.body.profile.gender.toLowerCase();
+  }
+
   const uprofile = await Profile.create({
     ...req.body.profile, userId: user._id
   });
