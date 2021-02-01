@@ -54,7 +54,7 @@ exports.createUserWallet = asyncHandler(async (req, res, next) => {
 // @route     POST /api/v1/user/wallet/update/balance
 // @access    Private/Authorized User
 exports.updateUserWalletBalance = asyncHandler(async (req, res, next) => {
-    const { appId, token, balance } = req.body;
+    const { appId, token, balance, balanceCurrency } = req.body;
 
     if (!appId || !token || !balance) {
         return next(new ErrorResponse('Please userId, appId and token', 400));
@@ -62,7 +62,7 @@ exports.updateUserWalletBalance = asyncHandler(async (req, res, next) => {
 
     const result = await Wallet.updateOne({
         userId: req.user._id, appId: ObjectId(appId), token
-    }, { $set: { balance } }, { upsert: false });
+    }, { $set: { balance, balanceCurrency } }, { upsert: false });
 
     console.log(`Update Result : ${JSON.stringify(result)}`)
 
@@ -72,8 +72,23 @@ exports.updateUserWalletBalance = asyncHandler(async (req, res, next) => {
             data: 'User Wallet successfully updated'
         });
     }
+
+    if (result.n === 0) {
+        return res.status(500).json({
+            success: false,
+            data: 'No record found to update'
+        });
+    }
+
+    if (result.n === 1 && result.nModified === 0) {
+        return res.status(200).json({
+            success: true,
+            data: 'User Wallet already updated'
+        });
+    }
+
     res.status(500).json({
         success: false,
-        data: 'User Wallet failed to update or record not found to update'
+        data: 'User Wallet failed to update'
     });
 });
