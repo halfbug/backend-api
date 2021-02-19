@@ -343,13 +343,12 @@ exports.plogin = asyncHandler(async (req, res, next) => {
 
   // Re Generate the OPT
   //  console.log(user)
-  const notp = await user.getRegeneratedOTP();
+  await user.getRegeneratedOTP();
   user = await user.save();
 
-  console.log(notp)
-  const message = `OTP-Hopeaccelerated has been successfully generated. Your pin is : ${notp}`;
+  const message = `OTP-Hopeaccelerated has been successfully generated. Your pin is : ${user.otp}`;
 
-  console.log(user)
+  console.log(user.otp)
   try {
 
     await sendSMS({
