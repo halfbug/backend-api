@@ -20,7 +20,7 @@ const ProfileSchema = new mongoose.Schema(
     dob: {
       type: Date,
       //default: Date.now
-      required: [true, 'Please give dob'],
+      // required: [true, 'Please give dob'],
     },
     
     website: {
