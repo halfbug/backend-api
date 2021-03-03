@@ -121,27 +121,27 @@ exports.regenotp = asyncHandler(async (req, res, next) => {
 
   // Re Generate the OPT
 
-  let notp = await user.getRegeneratedOTP();
+  await user.getRegeneratedOTP();
   user = await user.save();
 
 
-  const message = `OTP - Hopeaccelerated has been successfully generated. Your pin is : ${notp}`;
+  const message = `OTP - Hopeaccelerated has been successfully generated. Your pin is : ${user.otp}`;
 
   try {
 
-    if (phone)
-      await sendSMS({
-        phone,
-        message
-      });
-
-    if (!email === null)
+    
+    if (user.email)
       await sendEmail({
         email: user.email,
         subject: 'OTP - Hopeaccelerated',
         message
       });
 
+      if (phone)
+      await sendSMS({
+        phone,
+        message
+      });
 
 
     // const {status, email, createdAt, phone} = user
