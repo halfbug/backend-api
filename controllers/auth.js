@@ -5,6 +5,7 @@ const sendEmail = require('../utils/sendEmail');
 const sendSMS = require('../utils/sendSMS');
 const User = require('../models/User');
 const Profile = require('../models/Profile');
+const { default: axios } = require('axios');
 // const { hashIt } = require('../utils/helper')
 // @desc      Register user
 // @route     POST /api/v1/auth/register
@@ -85,11 +86,26 @@ exports.votp = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('OTP didnt match', 401));
   }
 
-
   await User.findByIdAndUpdate(user.id, { status: "active", otp: 0, qrcode: user.id }, {
     new: true,
     runValidators: true
   });
+
+  //## Adding User to the Chat DB as well
+  let url = `${process.env.MESSAGING_CHAT_SERVER_URL_LIVE}/api/v1/user/add/chat/db`;
+  axios.post(url,
+    {
+      "userId": user.id,
+      "name": user.email,
+      "email": user.email,
+      "phone": phone,
+      "qrCode": user.id
+    })
+    .then(async function (response) {
+      console.log(`Logging the Add User to Chat DB API Call Success Response`)
+    }).catch(function (err) {
+      console.log(`Logging the Add User to Chat DB API Call Error Response`)
+    });
 
   sendTokenResponse(user, 200, res);
 });
@@ -129,7 +145,7 @@ exports.regenotp = asyncHandler(async (req, res, next) => {
 
   try {
 
-    
+
     if (user.email)
       await sendEmail({
         email: user.email,
@@ -137,7 +153,7 @@ exports.regenotp = asyncHandler(async (req, res, next) => {
         message
       });
 
-      if (phone)
+    if (phone)
       await sendSMS({
         phone,
         message
@@ -175,6 +191,7 @@ exports.login = asyncHandler(async (req, res, next) => {
   // Check for user
   const user = await User.findOne({ email }).select('+password');
 
+
   if (!user) {
     return next(new ErrorResponse('Invalid credentials', 401));
   }
@@ -185,6 +202,17 @@ exports.login = asyncHandler(async (req, res, next) => {
   if (!isMatch) {
     return next(new ErrorResponse('Invalid credentials', 401));
   }
+
+  console.log(`user ${JSON.stringify(user)}`)
+
+  //## Updating User login status on the Chat DB as well
+  let url = `${process.env.MESSAGING_CHAT_SERVER_URL_LIVE}/api/v1/login/status/update?userId=${user._id}`;
+  axios.post(url)
+    .then(async function (response) {
+      console.log(`Logging the Update Login Status API Call Success Response`)
+    }).catch(function (err) {
+      console.log(`Logging the Update Login Status API Call Error Response`)
+    });
 
   sendTokenResponse(user, 200, res);
 });
@@ -197,6 +225,15 @@ exports.logout = asyncHandler(async (req, res, next) => {
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true
   });
+
+  // ## Updating User Logout status on the Chat DB as well
+  let url = `${process.env.MESSAGING_CHAT_SERVER_URL_LIVE}/api/v1/logout/status/update?userId=${req.user.id}`;
+  axios.post(url)
+    .then(async function (response) {
+      console.log(`Logging the Update Logout Status API Call Success Response`)
+    }).catch(function (err) {
+      console.log(`Logging the Update Logout Status API Call Error Response`)
+    });
 
   res.status(200).json({
     success: true,
@@ -361,8 +398,6 @@ exports.plogin = asyncHandler(async (req, res, next) => {
       subject: 'OTP - Hopeaccelerated',
       message
     });
-
-
 
     // const {status, email, createdAt, phone} = user
 
