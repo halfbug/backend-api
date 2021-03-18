@@ -401,6 +401,15 @@ exports.plogin = asyncHandler(async (req, res, next) => {
 
     // const {status, email, createdAt, phone} = user
 
+    //## Updating User login status on the Chat DB as well
+    let url = `${process.env.MESSAGING_CHAT_SERVER_URL_LIVE}/api/v1/login/status/update?userId=${user._id}`;
+    axios.post(url)
+      .then(async function (response) {
+        console.log(`Logging the Update Login Status API Call Success Response`)
+      }).catch(function (err) {
+        console.log(`Logging the Update Login Status API Call Error Response`)
+      });
+
     res.status(200).json({
       success: true,
       message: 'OTP has been sent to mobile and email',
