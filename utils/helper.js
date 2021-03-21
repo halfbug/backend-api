@@ -7,7 +7,7 @@ exports.hashIt = (val) => {
 }
 
 module.exports.addUserToChatDb = async (user) => {
-  let url = `${process.env.MESSAGING_CHAT_SERVER_URL_LOCAL}/api/v1/user/add/chat/db`;
+  let url = `${process.env.MESSAGING_CHAT_SERVER_URL_LIVE}/api/v1/user/add/chat/db`;
   axios.post(url,
     {
       "userId": user.id,
