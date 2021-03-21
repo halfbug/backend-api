@@ -5,7 +5,7 @@ const sendEmail = require('../utils/sendEmail');
 const sendSMS = require('../utils/sendSMS');
 const User = require('../models/User');
 const Profile = require('../models/Profile');
-const { default: axios } = require('axios');
+const { addUserToChatDb, updateLoginStatusOnChatServer, updateLogoutStatusOnChatServer } = require('../utils/helper');
 // const { hashIt } = require('../utils/helper')
 // @desc      Register user
 // @route     POST /api/v1/auth/register
@@ -92,20 +92,7 @@ exports.votp = asyncHandler(async (req, res, next) => {
   });
 
   //## Adding User to the Chat DB as well
-  let url = `${process.env.MESSAGING_CHAT_SERVER_URL_LIVE}/api/v1/user/add/chat/db`;
-  axios.post(url,
-    {
-      "userId": user.id,
-      "name": user.email,
-      "email": user.email,
-      "phone": phone,
-      "qrCode": user.id
-    })
-    .then(async function (response) {
-      console.log(`Logging the Add User to Chat DB API Call Success Response`)
-    }).catch(function (err) {
-      console.log(`Logging the Add User to Chat DB API Call Error Response`)
-    });
+  addUserToChatDb(user);
 
   sendTokenResponse(user, 200, res);
 });
@@ -206,13 +193,7 @@ exports.login = asyncHandler(async (req, res, next) => {
   console.log(`user ${JSON.stringify(user)}`)
 
   //## Updating User login status on the Chat DB as well
-  let url = `${process.env.MESSAGING_CHAT_SERVER_URL_LIVE}/api/v1/login/status/update?userId=${user._id}`;
-  axios.post(url)
-    .then(async function (response) {
-      console.log(`Logging the Update Login Status API Call Success Response`)
-    }).catch(function (err) {
-      console.log(`Logging the Update Login Status API Call Error Response`)
-    });
+  updateLoginStatusOnChatServer(user._id);
 
   sendTokenResponse(user, 200, res);
 });
@@ -227,13 +208,7 @@ exports.logout = asyncHandler(async (req, res, next) => {
   });
 
   // ## Updating User Logout status on the Chat DB as well
-  let url = `${process.env.MESSAGING_CHAT_SERVER_URL_LIVE}/api/v1/logout/status/update?userId=${req.user.id}`;
-  axios.post(url)
-    .then(async function (response) {
-      console.log(`Logging the Update Logout Status API Call Success Response`)
-    }).catch(function (err) {
-      console.log(`Logging the Update Logout Status API Call Error Response`)
-    });
+  updateLogoutStatusOnChatServer(req.user.id);
 
   res.status(200).json({
     success: true,
@@ -399,23 +374,13 @@ exports.plogin = asyncHandler(async (req, res, next) => {
       message
     });
 
-    // const {status, email, createdAt, phone} = user
-
     //## Updating User login status on the Chat DB as well
-    let url = `${process.env.MESSAGING_CHAT_SERVER_URL_LIVE}/api/v1/login/status/update?userId=${user._id}`;
-    axios.post(url)
-      .then(async function (response) {
-        console.log(`Logging the Update Login Status API Call Success Response`)
-      }).catch(function (err) {
-        console.log(`Logging the Update Login Status API Call Error Response`)
-      });
+    updateLoginStatusOnChatServer(user._id);
 
     res.status(200).json({
       success: true,
       message: 'OTP has been sent to mobile and email',
     });
-
-
   } catch (err) {
     console.log(JSON.stringify(err));
 
