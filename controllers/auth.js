@@ -5,6 +5,7 @@ const sendEmail = require('../utils/sendEmail');
 const sendSMS = require('../utils/sendSMS');
 const User = require('../models/User');
 const Profile = require('../models/Profile');
+const { addUserToChatDb, updateLoginStatusOnChatServer, updateLogoutStatusOnChatServer } = require('../utils/helper');
 // const { hashIt } = require('../utils/helper')
 // @desc      Register user
 // @route     POST /api/v1/auth/register
@@ -85,11 +86,13 @@ exports.votp = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('OTP didnt match', 401));
   }
 
-
   await User.findByIdAndUpdate(user.id, { status: "active", otp: 0, qrcode: user.id }, {
     new: true,
     runValidators: true
   });
+
+  //## Adding User to the Chat DB as well
+  addUserToChatDb(user);
 
   sendTokenResponse(user, 200, res);
 });
@@ -129,7 +132,7 @@ exports.regenotp = asyncHandler(async (req, res, next) => {
 
   try {
 
-    
+
     if (user.email)
       await sendEmail({
         email: user.email,
@@ -137,7 +140,7 @@ exports.regenotp = asyncHandler(async (req, res, next) => {
         message
       });
 
-      if (phone)
+    if (phone)
       await sendSMS({
         phone,
         message
@@ -175,6 +178,7 @@ exports.login = asyncHandler(async (req, res, next) => {
   // Check for user
   const user = await User.findOne({ email }).select('+password');
 
+
   if (!user) {
     return next(new ErrorResponse('Invalid credentials', 401));
   }
@@ -185,6 +189,11 @@ exports.login = asyncHandler(async (req, res, next) => {
   if (!isMatch) {
     return next(new ErrorResponse('Invalid credentials', 401));
   }
+
+  console.log(`user ${JSON.stringify(user)}`)
+
+  //## Updating User login status on the Chat DB as well
+  updateLoginStatusOnChatServer(user._id);
 
   sendTokenResponse(user, 200, res);
 });
@@ -197,6 +206,9 @@ exports.logout = asyncHandler(async (req, res, next) => {
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true
   });
+
+  // ## Updating User Logout status on the Chat DB as well
+  updateLogoutStatusOnChatServer(req.user.id);
 
   res.status(200).json({
     success: true,
@@ -362,16 +374,13 @@ exports.plogin = asyncHandler(async (req, res, next) => {
       message
     });
 
-
-
-    // const {status, email, createdAt, phone} = user
+    //## Updating User login status on the Chat DB as well
+    updateLoginStatusOnChatServer(user._id);
 
     res.status(200).json({
       success: true,
       message: 'OTP has been sent to mobile and email',
     });
-
-
   } catch (err) {
     console.log(JSON.stringify(err));
 
