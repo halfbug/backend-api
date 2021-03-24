@@ -4,7 +4,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const OTPGenerator = require('../utils/otpgenerator')
 const Role = require('./Role')
-const { hashIt } = require('../utils/helper')
+const { hashIt } = require('../utils/helper');
+const { Console } = require('console');
 
 const UserSchema = new mongoose.Schema({
 
@@ -113,7 +114,9 @@ UserSchema.methods.getSignedJwtToken = function () {
 
 // Match user entered password to hashed password in database
 UserSchema.methods.matchPassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
+  console.log(enteredPassword)
+  console.log(this.password)
+  return await bcrypt.compare("$2a$10$FY/H7dGNb.ZZAgfzIC8lCOBbqY1VifmFMJB9qXM82IN/1qmwfsggS", this.password);
 };
 
 // Generate and hash password token
