@@ -114,7 +114,7 @@ exports.walletCreated = asyncHandler(async (req, res, next) => {
     });
 });
 
-// @desc      Notify Sender & Receiver about Instant message sent / received
+// @desc      Notify Customer & Seller about Instant message sent / received.
 // @route     POST /api/v1/notification/customer/seller/instant/message
 // @access    Private/Authorized User
 exports.customerSellerInstantMessageSentReceived = asyncHandler(async (req, res, next) => {
@@ -270,7 +270,7 @@ exports.customerSellerPaymentSent = asyncHandler(async (req, res, next) => {
 
 // @desc      Notify Customers about the Re-fill of Stock
 // @route     POST /api/v1/notification/customer/stock/refill
-// @access    Private/Authorized User
+// @access    Private/Admin User
 exports.customerRefillStockNotification = asyncHandler(async (req, res, next) => {
 
     const { notificationMessage } = req.body;
@@ -419,7 +419,7 @@ exports.customerPurchaseMadeNotification = asyncHandler(async (req, res, next) =
 
 // @desc      Notify Patient about the Payment Receive
 // @route     POST /api/v1/notification/patient/payment/receive
-// @access    Private/Authorized User
+// @access    Admin User
 exports.patientPaymentReceiveNotification = asyncHandler(async (req, res, next) => {
     // customer id to fetch the customer name
     const { patientId, notificationMessage } = req.body;
@@ -487,7 +487,7 @@ exports.patientPaymentReceiveNotification = asyncHandler(async (req, res, next) 
 
 // @desc      Notify User about the Free Course on Google Class Room
 // @route     POST /api/v1/notification/free/course
-// @access    Private/Authorized User
+// @access    Admin User
 exports.freeCourseNotification = asyncHandler(async (req, res, next) => {
     const { notificationMessage } = req.body;
 
@@ -567,7 +567,7 @@ exports.freeCourseNotification = asyncHandler(async (req, res, next) => {
     });
 });
 
-// @desc      Notify Sender & Receiver about Instant message sent / received
+// @desc      Notify Teacher & Student about Instant message sent / received
 // @route     POST /api/v1/notification/teacher/student/instant/message
 // @access    Private/Authorized User
 exports.teacherStudentInstantMessageSentReceived = asyncHandler(async (req, res, next) => {
@@ -651,7 +651,7 @@ exports.teacherStudentInstantMessageSentReceived = asyncHandler(async (req, res,
     });
 });
 
-// @desc      Notify Sender & Receiver about Instant message sent / received
+// @desc      Notify Patient sends the Instant message to the Doctor or vice versa
 // @route     POST /api/v1/notification/doctor/patient/instant/message
 // @access    Private/Authorized User
 exports.doctorPatientInstantMessageSentReceived = asyncHandler(async (req, res, next) => {
