@@ -57,8 +57,8 @@ Request Method: POST
 Request Headers: Content-Type: multipart/form-data; boundary=<calculated when request is sent>
 Request Body: 
 {
-    file: Data Type (Binary file) Mandatory to set
-    relatedTo: Data Type (String) Mandatory to set
+    file: << attach the binary file >>  | Mandatory
+    relatedTo: << random value in String >> | Mandatory
 }
 Success Response:
 {
@@ -89,8 +89,9 @@ Accessiblity: Authorized
 Request Method: POST
 Request Headers: Content-Type: multipart/form-data; boundary=<calculated when request is sent>
 Request Body: 
+Request Body: 
 {
-    file: Data Type (Binary file) Mandatory to set
+    file: << attach one or more binary files >>  | Mandatory
 }
 Success Response:
 {
@@ -151,11 +152,11 @@ Request Query Params: id (User id)
 Request Method: PUT
 Request Headers: Content-Type: application/json
 Request Body: {
-    "token": Data Type (String) Mandatory to Set,
-    "appId": Data Type (String) Mandatory to Set,
-    "balance": Data Type (String) Mandatory to Set,
-    "balanceCurrency": Data Type (String) Mandatory to Set,
-    "action": Data Type (Array of String) Mandatory to Set i-e ["cashout","exchange","send"]
+    "token": << String >> | Mandatory,
+    "appId": << String >> | Mandatory,
+    "balance": << String >> | Mandatory,
+    "balanceCurrency": << String >>  | Mandatory,
+    "action": << Array of String >> | Mandatory i-e ["cashout","exchange","send"]
 }
 Success Response:
 {
@@ -216,10 +217,10 @@ Request Params: id (User id)
 Request Method: PUT
 Request Headers: Content-Type: application/json
 Request Body: {
-    "token": Data Type (String) Mandatory to Set,
-    "appId": Data Type (String) Mandatory to Set,
-    "balance": Data Type (String) Mandatory to Set,
-    "balanceCurrency": Data Type (String) Mandatory to Set
+    "token": << String >> | Mandatory,
+    "appId": << String >> | Mandatory,
+    "balance": << String >> | Mandatory,
+    "balanceCurrency": << String >>  | Mandatory,
 }
 Success Response:
 {
