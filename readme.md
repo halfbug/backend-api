@@ -45,6 +45,9 @@ Extensive documentation with examples [here](https://hopeaccelerated-backend.her
 - Author: Sadaf Siddiqui
 
 - Wallet APIs Document
+  -> Directory and file structure is same as of other features
+  -> It make use of Wallet, Attachment and User models
+  -> Attachment APIs related to wallet uses this "ATTACHMENT_UPLOD_PATH" constant from config.env file
 
 ```
 Description: API to upload single file / attachment
@@ -217,6 +220,281 @@ Request Body: {
     "appId": Data Type (String) Mandatory to Set,
     "balance": Data Type (String) Mandatory to Set,
     "balanceCurrency": Data Type (String) Mandatory to Set
+}
+Success Response:
+{
+  "data": {
+    "statusCode": 201,
+    "message": ""
+  }
+}
+or
+Validation Error Response: 
+{
+  "data": {
+    "statusCode": 400,
+    "message": ""
+  }
+}
+Fail Response: 
+{
+    "success": false,
+    "error": ""
+}
+```
+
+
+- Push Notifications APIs Document
+  -> Directory and file structure is same as of other features
+  -> It make use of User, Roles and RolesProfile models
+  -> Push Notifications APIs uses this "PUSHY_SECRET_API_KEY_BIG_MUDI", "PUSHY_SECRET_API_KEY_BLOCK_ED", "PUSHY_SECRET_API_KEY_BLOCK_RIDE",
+  "PUSHY_SECRET_API_KEY_BLOCK_MED", "PUSHY_SECRET_API_KEY_BLOCK_M" constants from config.env file
+
+```
+Description: API to notify the user about its wallet is created
+Route: /api/v1/notification/wallet/created
+Accessiblity: Admin User
+Request Method: POST
+Request Headers: Content-Type: application/json
+Request Body: 
+{
+    "userId": << Table Id of the User>>  | (Mandatory),
+    "notificationMessage": << Random Message >> | (Mandatory)
+}
+Success Response:
+{
+  "data": {
+    "statusCode": 201,
+    "message": ""
+  }
+}
+or
+Validation Error Response: 
+{
+  "data": {
+    "statusCode": 400,
+    "message": ""
+  }
+}
+Fail Response: 
+{
+    "success": false,
+    "error": ""
+}
+```
+
+```
+Description: API to notify all the customers the stock is re-filled
+Route: /api/v1/notification/customer/refill/stock
+Accessiblity: Admin User
+Request Method: POST
+Request Headers: Content-Type: application/json
+Request Body: 
+{
+    "notificationMessage": << Random Message >> | (Mandatory)
+}
+Success Response:
+{
+  "data": {
+    "statusCode": 201,
+    "message": ""
+  }
+}
+or
+Validation Error Response: 
+{
+  "data": {
+    "statusCode": 400,
+    "message": ""
+  }
+}
+Fail Response: 
+{
+    "success": false,
+    "error": ""
+}
+```
+
+```
+Description: API to notify the customer / seller that instant message is sent / received
+Route: /api/v1/notification/customer/seller/instant/message
+Accessiblity: Authorized User
+Request Method: POST
+Request Headers: Content-Type: application/json
+Request Body: 
+{
+    "senderId": << Table Id of the User with Seller role or Customer role >>  | (Mandatory),
+    "receiverId": << Table Id of the User with the Seller role or Customer role >>  | (Mandatory),
+    "senderNotificationMessage": << Random Message >> | (Mandatory)
+    "receiverNotificationMessage": << Random Message >> | (Mandatory)
+}
+Success Response:
+{
+  "data": {
+    "statusCode": 201,
+    "message": ""
+  }
+}
+or
+Validation Error Response: 
+{
+  "data": {
+    "statusCode": 400,
+    "message": ""
+  }
+}
+Fail Response: 
+{
+    "success": false,
+    "error": ""
+}
+```
+
+```
+Description: API to notify the teacher / student that instant message is sent / received
+Route: /api/v1/notification/teacher/student/instant/message
+Accessiblity: Authorized User
+Request Method: POST
+Request Headers: Content-Type: application/json
+Request Body: 
+{
+    "senderId": << Table Id of the User with Teacher role or Student role >>  | (Mandatory),
+    "receiverId": << Table Id of the User with the Teacher role or Student role >>  | (Mandatory),
+    "senderNotificationMessage": << Random Message >> | (Mandatory)
+    "receiverNotificationMessage": << Random Message >> | (Mandatory)
+}
+Success Response:
+{
+  "data": {
+    "statusCode": 201,
+    "message": ""
+  }
+}
+or
+Validation Error Response: 
+{
+  "data": {
+    "statusCode": 400,
+    "message": ""
+  }
+}
+Fail Response: 
+{
+    "success": false,
+    "error": ""
+}
+```
+
+```
+Description: API to notify the seller that your customer sents you the payment
+Route: /api/v1/notification/customer/seller/payment/sent
+Accessiblity: Authorized User
+Request Method: POST
+Request Headers: Content-Type: application/json
+Request Body: 
+{
+    "sellerId": << Table Id of the User with Seller role >>  | (Mandatory),
+    "notificationMessage": << Random Message >> | (Mandatory)
+}
+Success Response:
+{
+  "data": {
+    "statusCode": 201,
+    "message": ""
+  }
+}
+or
+Validation Error Response: 
+{
+  "data": {
+    "statusCode": 400,
+    "message": ""
+  }
+}
+Fail Response: 
+{
+    "success": false,
+    "error": ""
+}
+```
+
+```
+Description: API to notify the seller that your customer made the Purchase
+Route: /api/v1/notification/customer/purchase/made
+Accessiblity: Authorized User
+Request Method: POST
+Request Headers: Content-Type: application/json
+Request Body: 
+{
+    "sellerId": << Table Id of the User with Seller role >>  | (Mandatory),
+    "notificationMessage": << Random Message >> | (Mandatory)
+}
+Success Response:
+{
+  "data": {
+    "statusCode": 201,
+    "message": ""
+  }
+}
+or
+Validation Error Response: 
+{
+  "data": {
+    "statusCode": 400,
+    "message": ""
+  }
+}
+Fail Response: 
+{
+    "success": false,
+    "error": ""
+}
+```
+
+```
+Description: API to notify the doctor / patient that instant message is sent / received
+Route: /api/v1/notification/doctor/patient/instant/message
+Accessiblity: Authorized User
+Request Method: POST
+Request Headers: Content-Type: application/json
+Request Body: 
+{
+    "senderId": << Table Id of the User with Doctor role or Patient role >>  | (Mandatory),
+    "receiverId": << Table Id of the User with the Doctor role or Patient role >>  | (Mandatory),
+    "senderNotificationMessage": << Random Message >> | (Mandatory)
+    "receiverNotificationMessage": << Random Message >> | (Mandatory)
+}
+Success Response:
+{
+  "data": {
+    "statusCode": 201,
+    "message": ""
+  }
+}
+or
+Validation Error Response: 
+{
+  "data": {
+    "statusCode": 400,
+    "message": ""
+  }
+}
+Fail Response: 
+{
+    "success": false,
+    "error": ""
+}
+```
+
+```
+Description: API to notify the all the Students that free Course is available
+Route: /api/v1/notification/student/free/course
+Accessiblity: Admin User
+Request Method: POST
+Request Headers: Content-Type: application/json
+Request Body: 
+{
+    "notificationMessage": << Random Message >> | (Mandatory)
 }
 Success Response:
 {
