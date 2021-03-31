@@ -107,7 +107,7 @@ exports.walletCreated = asyncHandler(async (req, res, next) => {
         sendPushNotification(data, userData.deviceIds, options, api);       
     });
 
-    return res.status(201).json({
+    return res.status(200).json({
         success: true,
         // pushId: id,
         data: 'User is successfully notified on his / her Device'
@@ -194,7 +194,7 @@ exports.customerSellerInstantMessageSentReceived = asyncHandler(async (req, res,
     }
 
     // Push sent successfully
-    return res.status(201).json({
+    return res.status(200).json({
         success: true,
         data: 'Sender and Receivers are successfully notified on their Devices'
     });
@@ -262,7 +262,7 @@ exports.customerSellerPaymentSent = asyncHandler(async (req, res, next) => {
     // Send push notification
     await sendPushNotification(data, userData.deviceIds, options, api);
 
-    return res.status(201).json({
+    return res.status(200).json({
         success: true,
         data: 'Seller is successfully notified on his / her Device'
     });
@@ -342,7 +342,7 @@ exports.customerRefillStockNotification = asyncHandler(async (req, res, next) =>
     console.log('sending final response');
 
     // Push sent successfully
-    return res.status(201).json({
+    return res.status(200).json({
         success: true,
         data: 'Customers are successfully notified on their Devices'
     });
@@ -411,7 +411,7 @@ exports.customerPurchaseMadeNotification = asyncHandler(async (req, res, next) =
     await sendPushNotification(data, sellerData.deviceIds, options, api);
 
     // Push sent successfully
-    return res.status(201).json({
+    return res.status(200).json({
         success: true,
         data: 'Seller is successfully notified on their Devices'
     });
@@ -479,7 +479,7 @@ exports.patientPaymentReceiveNotification = asyncHandler(async (req, res, next) 
     await sendPushNotification(data, patientData.deviceIds, options, api);
 
     // Push sent successfully
-    return res.status(201).json({
+    return res.status(200).json({
         success: true,
         data: 'Patient is successfully notified on their Devices'
     });
@@ -561,7 +561,7 @@ exports.freeCourseNotification = asyncHandler(async (req, res, next) => {
     console.log('sending final response');
 
     // Push sent successfully
-    return res.status(201).json({
+    return res.status(200).json({
         success: true,
         data: 'Students are successfully notified on their Devices'
     });
@@ -645,7 +645,7 @@ exports.teacherStudentInstantMessageSentReceived = asyncHandler(async (req, res,
     }
 
     // Push sent successfully
-    return res.status(201).json({
+    return res.status(200).json({
         success: true,
         data: 'Sender and Receivers are successfully notified on their Devices'
     });
@@ -729,7 +729,7 @@ exports.doctorPatientInstantMessageSentReceived = asyncHandler(async (req, res, 
     }
 
     // Push sent successfully
-    return res.status(201).json({
+    return res.status(200).json({
         success: true,
         data: 'Sender and Receivers are successfully notified on their Devices'
     });
