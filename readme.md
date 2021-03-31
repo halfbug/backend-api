@@ -249,8 +249,9 @@ Status: 500
 - Push Notifications APIs Document
   -> Directory and file structure is same as of other features
   -> It make use of User, Roles and RolesProfile models
-  -> Push Notifications APIs uses this "PUSHY_SECRET_API_KEY_BIG_MUDI", "PUSHY_SECRET_API_KEY_BLOCK_ED", "PUSHY_SECRET_API_KEY_BLOCK_RIDE",
-  "PUSHY_SECRET_API_KEY_BLOCK_MED", "PUSHY_SECRET_API_KEY_BLOCK_M" constants from config.env file
+  -> Push Notifications APIs uses these "PUSHY_SECRET_API_KEY_BIG_MUDI", "PUSHY_SECRET_API_KEY_BLOCK_ED", "PUSHY_SECRET_API_KEY_BLOCK_RIDE", "PUSHY_SECRET_API_KEY_BLOCK_MED", "PUSHY_SECRET_API_KEY_BLOCK_M" 
+   constants from config.env file. These constants will contain the pushy api key for each App, 
+   Therefore it is mandatory to set this in order to Push Notifications perform correctly.
 
 ```
 Description: API to notify the user about its wallet is created
