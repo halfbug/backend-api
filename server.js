@@ -38,6 +38,7 @@ const attachment = require('./routes/attachment');
 const wallet = require('./routes/wallet');
 const pushNotification = require('./routes/pushNotification');
 const agoraVideoSession = require('./routes/agoraVideoSession');
+const coursesfeed = require('./routes/coursesfeed');
 
 const app = express();
 
@@ -95,7 +96,7 @@ app.use('/api/v1/event', event);
 app.use('/api/v1/questionnaire', questionnaire);
 app.use('/api/v1/product', product);
 app.use('/api/v1/category', category);
-
+app.use('/api/v1/coursesfeed', coursesfeed);
 app.use('/api/v1/attachment', attachment);
 app.use('/api/v1/kyc', users);
 app.use('/api/v1/user/wallet', wallet);
