@@ -28,7 +28,8 @@ exports.getCourses = asyncHandler(async (req, res, next) => {
          link: `https://www.udemy.com${course.url}`,
          detail : course.headline,
          image : course.image_240x135,
-         auther : course.visible_instructors
+         auther : course.visible_instructors,
+         price: course.price_detail
       }
       
       });
