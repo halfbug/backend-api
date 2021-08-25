@@ -1,6 +1,6 @@
 # Hopeaccelerated API
 
-> Backend API for Hopeaccelerated application, which is a bootcamp directory website
+> Backend API for Hopeaccelerated application, which is a combine backend for 5 mobile apps.
 
 ## Usage
 
